@@ -18,7 +18,7 @@ export function StatCard({ label, value, icon, trend, color = 'text-primary-600'
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{label}</p>
-          <p className={`text-2xl font-bold mt-2 ${color} dark:${color}`}>{value}</p>
+          <p className={`text-2xl font-bold mt-2 ${color}`}>{value}</p>
           {trend && (
             <div className="flex items-center mt-2 text-sm">
               <span

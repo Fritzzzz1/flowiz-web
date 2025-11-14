@@ -4,9 +4,7 @@ import { clsx } from 'clsx';
 
 const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'Upload', href: '/upload' },
-  { name: 'Dashboard', href: '/dashboard' },
-  { name: 'Integrations', href: '/integrations' },
+  { name: 'Visualize', href: '/visualize' },
 ];
 
 export function Header() {
