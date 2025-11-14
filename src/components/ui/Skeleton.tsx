@@ -22,7 +22,7 @@ export function Skeleton({
   const skeletonClass = clsx(
     'animate-pulse bg-gray-200 dark:bg-gray-700',
     {
-      'rounded': variant === 'text',
+      rounded: variant === 'text',
       'rounded-full': variant === 'circular',
       'rounded-lg': variant === 'rectangular',
       'h-4': variant === 'text' && !height,

@@ -19,6 +19,9 @@ export interface Job {
   environment?: Record<string, string>;
   runsOn?: string;
   if?: string;
+  // Optional initial positions for demo/visualization purposes
+  x?: number;
+  y?: number;
 }
 
 export interface Step {

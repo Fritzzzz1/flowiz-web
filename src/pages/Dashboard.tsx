@@ -31,12 +31,7 @@ export function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <StatCard
-            label="Total Jobs"
-            value={totalJobs}
-            icon="📊"
-            color="text-blue-600"
-          />
+          <StatCard label="Total Jobs" value={totalJobs} icon="📊" color="text-blue-600" />
           <StatCard
             label="Jobs with Dependencies"
             value={jobsWithDeps}
@@ -49,12 +44,7 @@ export function Dashboard() {
             icon="📈"
             color="text-green-600"
           />
-          <StatCard
-            label="Total Steps"
-            value={totalSteps}
-            icon="⚙️"
-            color="text-orange-600"
-          />
+          <StatCard label="Total Steps" value={totalSteps} icon="⚙️" color="text-orange-600" />
         </div>
 
         {/* Jobs List */}

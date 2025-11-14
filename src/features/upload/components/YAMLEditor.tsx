@@ -35,9 +35,7 @@ export function YAMLEditor({ value, onChange, error, readonly = false }: YAMLEdi
             'bg-gray-50 dark:bg-gray-900 border rounded-lg',
             'text-gray-900 dark:text-gray-100',
             'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
-            error
-              ? 'border-red-300 dark:border-red-600'
-              : 'border-gray-300 dark:border-gray-600',
+            error ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600',
             readonly && 'cursor-not-allowed opacity-75'
           )}
           placeholder="Paste your GitHub Actions or GitLab CI YAML configuration here..."

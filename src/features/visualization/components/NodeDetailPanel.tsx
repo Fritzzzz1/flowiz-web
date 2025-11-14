@@ -98,7 +98,10 @@ export function NodeDetailPanel({ node, isOpen, onClose }: NodeDetailPanelProps)
               </h4>
               <div className="space-y-3">
                 {node.steps.map((step, index) => (
-                  <div key={index} className="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+                  <div
+                    key={index}
+                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-3"
+                  >
                     {step.name && (
                       <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">
                         {step.name}
