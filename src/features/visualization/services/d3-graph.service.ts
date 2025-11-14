@@ -77,9 +77,15 @@ export class D3GraphService {
   }
 
   private transformData(pipeline: ParseResponse): { nodes: NodeDatum[]; edges: EdgeDatum[] } {
-    const nodes: NodeDatum[] = pipeline.jobs.map((job) => ({
-      ...job,
-    }));
+    const nodes: NodeDatum[] = pipeline.jobs.map((job) => {
+      const node: NodeDatum = { ...job };
+      // Use predefined positions if available (for demo mode with nice initial layout)
+      if (job.x !== undefined && job.y !== undefined) {
+        node.x = job.x;
+        node.y = job.y;
+      }
+      return node;
+    });
 
     const edges: EdgeDatum[] = [];
     pipeline.jobs.forEach((job) => {
@@ -101,7 +107,10 @@ export class D3GraphService {
   ) {
     const { nodes, edges } = this.transformData(pipeline);
 
-    // Create force simulation
+    // Check if nodes have predefined positions (demo mode)
+    const hasInitialPositions = nodes.some((n) => n.x !== undefined && n.y !== undefined);
+
+    // Create force simulation with weaker forces if using initial positions
     this.simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -109,11 +118,13 @@ export class D3GraphService {
         d3
           .forceLink<NodeDatum, EdgeDatum>(edges)
           .id((d) => d.id)
-          .distance(150)
+          .distance(hasInitialPositions ? 200 : 150)
+          .strength(hasInitialPositions ? 0.3 : 1)
       )
-      .force('charge', d3.forceManyBody().strength(-300))
+      .force('charge', d3.forceManyBody().strength(hasInitialPositions ? -100 : -300))
       .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-      .force('collision', d3.forceCollide().radius(50));
+      .force('collision', d3.forceCollide().radius(60))
+      .alphaDecay(hasInitialPositions ? 0.05 : 0.0228); // Faster settling with initial positions
 
     // Render edges
     const link = this.g
@@ -167,21 +178,23 @@ export class D3GraphService {
     // Add circles
     node
       .append('circle')
-      .attr('r', 40)
+      .attr('r', 50)
       .attr('fill', '#3b82f6')
       .attr('stroke', '#fff')
-      .attr('stroke-width', 2);
+      .attr('stroke-width', 3)
+      .attr('filter', 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))');
 
     // Add labels
     node
       .append('text')
-      .text((d) => this.truncateLabel(d.name, 12))
+      .text((d) => this.truncateLabel(d.name, 15))
       .attr('text-anchor', 'middle')
       .attr('dy', '.35em')
       .attr('fill', '#fff')
-      .attr('font-size', '14px')
-      .attr('font-weight', '500')
-      .attr('pointer-events', 'none');
+      .attr('font-size', '13px')
+      .attr('font-weight', '600')
+      .attr('pointer-events', 'none')
+      .style('text-shadow', '0 1px 2px rgba(0, 0, 0, 0.3)');
 
     // Update positions on tick
     this.simulation.on('tick', () => {

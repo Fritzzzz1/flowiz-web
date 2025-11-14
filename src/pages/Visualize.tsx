@@ -78,10 +78,10 @@ export function Visualize() {
                 <span className="text-2xl">🎮</span>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">
-                    Demo Mode - Interactive Microservices Pipeline
+                    Demo Mode - E-Commerce Microservices Pipeline
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    You're viewing a sample complex pipeline. Upload your own to see real data!
+                    Exploring a sample pipeline with 12 jobs: 🔧 Setup → 🔐 Auth/⚡ API/🎨 Frontend → 🧪 Tests → 🔗 Integration → 🛡️ Security → 🚀 Staging → 🎭 E2E → 🌟 Production
                   </p>
                 </div>
               </div>
