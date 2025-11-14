@@ -67,9 +67,12 @@ const iconsByType = {
 };
 
 const colorsByType = {
-  success: 'bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700',
-  error: 'bg-red-50 dark:bg-red-900 text-red-800 dark:text-red-200 border-red-200 dark:border-red-700',
-  warning: 'bg-yellow-50 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-700',
+  success:
+    'bg-green-50 dark:bg-green-900 text-green-800 dark:text-green-200 border-green-200 dark:border-green-700',
+  error:
+    'bg-red-50 dark:bg-red-900 text-red-800 dark:text-red-200 border-red-200 dark:border-red-700',
+  warning:
+    'bg-yellow-50 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 border-yellow-200 dark:border-yellow-700',
   info: 'bg-blue-50 dark:bg-blue-900 text-blue-800 dark:text-blue-200 border-blue-200 dark:border-blue-700',
 };
 
@@ -109,18 +112,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
-  const showToast = useCallback((options: Omit<Toast, 'id'>) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    const toast: Toast = { id, duration: 5000, ...options };
+  const showToast = useCallback(
+    (options: Omit<Toast, 'id'>) => {
+      const id = Math.random().toString(36).substring(2, 9);
+      const toast: Toast = { id, duration: 5000, ...options };
 
-    setToasts((prev) => [...prev, toast]);
+      setToasts((prev) => [...prev, toast]);
 
-    if (toast.duration) {
-      setTimeout(() => {
-        dismissToast(id);
-      }, toast.duration);
-    }
-  }, [dismissToast]);
+      if (toast.duration) {
+        setTimeout(() => {
+          dismissToast(id);
+        }, toast.duration);
+      }
+    },
+    [dismissToast]
+  );
 
   return (
     <ToastContext.Provider value={{ showToast, dismissToast }}>

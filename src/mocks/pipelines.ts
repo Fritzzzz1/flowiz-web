@@ -278,7 +278,10 @@ export const mockComplexPipeline: ParseResponse = {
       name: '🛡️ Security Scan',
       dependencies: ['integration'],
       steps: [
-        { name: 'Trivy vulnerability scan', run: 'trivy image --severity HIGH,CRITICAL shop/auth:latest' },
+        {
+          name: 'Trivy vulnerability scan',
+          run: 'trivy image --severity HIGH,CRITICAL shop/auth:latest',
+        },
         { name: 'SAST analysis', run: 'semgrep --config auto' },
         { name: 'Dependency audit', run: 'pnpm audit --audit-level moderate' },
         { name: 'License check', run: 'pnpm licenses check' },
@@ -296,7 +299,10 @@ export const mockComplexPipeline: ParseResponse = {
         { name: 'Configure kubectl', run: 'aws eks update-kubeconfig --name staging-cluster' },
         { name: 'Deploy to staging', run: 'kubectl apply -k k8s/overlays/staging' },
         { name: 'Wait for rollout', run: 'kubectl rollout status deployment/shop-api -n staging' },
-        { name: 'Run smoke tests', run: './scripts/smoke-tests.sh https://staging.shop.example.com' },
+        {
+          name: 'Run smoke tests',
+          run: './scripts/smoke-tests.sh https://staging.shop.example.com',
+        },
       ],
       environment: { KUBE_CONTEXT: 'staging', AWS_REGION: 'us-east-1' },
       runsOn: 'ubuntu-latest',
@@ -325,8 +331,14 @@ export const mockComplexPipeline: ParseResponse = {
       steps: [
         { name: 'Configure kubectl', run: 'aws eks update-kubeconfig --name prod-cluster' },
         { name: 'Deploy to production', run: 'kubectl apply -k k8s/overlays/production' },
-        { name: 'Wait for rollout', run: 'kubectl rollout status deployment/shop-api -n production' },
-        { name: 'Verify deployment', run: './scripts/verify-deployment.sh https://shop.example.com' },
+        {
+          name: 'Wait for rollout',
+          run: 'kubectl rollout status deployment/shop-api -n production',
+        },
+        {
+          name: 'Verify deployment',
+          run: './scripts/verify-deployment.sh https://shop.example.com',
+        },
         { name: 'Notify Slack', run: 'curl -X POST $SLACK_WEBHOOK -d "Deployment successful!"' },
       ],
       environment: { KUBE_CONTEXT: 'production', AWS_REGION: 'us-east-1' },

@@ -26,9 +26,7 @@ export function Integrations() {
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Connect your GitHub account to access repositories and workflows
               </p>
-              <Button disabled>
-                Connect GitHub (OAuth Coming Soon)
-              </Button>
+              <Button disabled>Connect GitHub (OAuth Coming Soon)</Button>
             </div>
           </Card>
 
@@ -38,13 +36,13 @@ export function Integrations() {
               <svg className="w-16 h-16 mx-auto mb-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M23.546 10.93L13.067.452c-.604-.603-1.582-.603-2.188 0L.452 10.93c-.6.605-.6 1.584 0 2.188l10.427 10.426c.603.602 1.582.602 2.188 0l10.479-10.426c.6-.604.6-1.583 0-2.188z" />
               </svg>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">GitLab CI</h3>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                GitLab CI
+              </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 Connect your GitLab account to access projects and pipelines
               </p>
-              <Button disabled>
-                Connect GitLab (OAuth Coming Soon)
-              </Button>
+              <Button disabled>Connect GitLab (OAuth Coming Soon)</Button>
             </div>
           </Card>
         </div>

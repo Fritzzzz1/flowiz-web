@@ -57,13 +57,9 @@ export function Upload() {
           <Card
             header={
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Upload File
-                </h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Upload File</h3>
                 {fileName && (
-                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                    File: {fileName}
-                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">File: {fileName}</span>
                 )}
               </div>
             }
@@ -91,11 +87,7 @@ export function Upload() {
                 Clear
               </Button>
               <div className="flex gap-3">
-                <Button
-                  onClick={handleParse}
-                  disabled={!canParse}
-                  loading={parseConfig.isPending}
-                >
+                <Button onClick={handleParse} disabled={!canParse} loading={parseConfig.isPending}>
                   {parseConfig.isPending ? 'Parsing...' : 'Parse & Visualize'}
                 </Button>
               </div>

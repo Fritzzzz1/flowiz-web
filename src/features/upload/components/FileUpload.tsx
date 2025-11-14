@@ -7,7 +7,11 @@ export interface FileUploadProps {
   maxSize?: number;
 }
 
-export function FileUpload({ onFileSelect, accept = '.yml,.yaml', maxSize = 1024 * 1024 }: FileUploadProps) {
+export function FileUpload({
+  onFileSelect,
+  accept = '.yml,.yaml',
+  maxSize = 1024 * 1024,
+}: FileUploadProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -129,7 +133,9 @@ export function FileUpload({ onFileSelect, accept = '.yml,.yaml', maxSize = 1024
               </span>
               <span className="text-gray-600 dark:text-gray-400"> or drag and drop</span>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400">YAML files only (.yml, .yaml)</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              YAML files only (.yml, .yaml)
+            </p>
           </div>
         </label>
       </div>

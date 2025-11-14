@@ -9,7 +9,7 @@ interface InteractiveCardProps {
 export function InteractiveCard({
   children,
   className = '',
-  glowColor = '59, 130, 246' // RGB for blue-500
+  glowColor = '59, 130, 246', // RGB for blue-500
 }: InteractiveCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [rotateX, setRotateX] = useState(0);

@@ -37,9 +37,7 @@ export function Visualize() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/upload">
-                <Button size="lg">
-                  📤 Upload Your Configuration
-                </Button>
+                <Button size="lg">📤 Upload Your Configuration</Button>
               </Link>
               <Link to="/visualize?demo=true">
                 <Button size="lg" variant="secondary">
@@ -81,7 +79,8 @@ export function Visualize() {
                     Demo Mode - E-Commerce Microservices Pipeline
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Exploring a sample pipeline with 12 jobs: 🔧 Setup → 🔐 Auth/⚡ API/🎨 Frontend → 🧪 Tests → 🔗 Integration → 🛡️ Security → 🚀 Staging → 🎭 E2E → 🌟 Production
+                    Exploring a sample pipeline with 12 jobs: 🔧 Setup → 🔐 Auth/⚡ API/🎨 Frontend
+                    → 🧪 Tests → 🔗 Integration → 🛡️ Security → 🚀 Staging → 🎭 E2E → 🌟 Production
                   </p>
                 </div>
               </div>

@@ -29,8 +29,7 @@ export const apiService = {
   githubCallback: (code: string) =>
     httpService.post<AuthResponse>('/integrations/github/callback', { code }),
 
-  getGitHubRepositories: () =>
-    httpService.get<Repository[]>('/integrations/github/repositories'),
+  getGitHubRepositories: () => httpService.get<Repository[]>('/integrations/github/repositories'),
 
   getGitHubPipelineRuns: (repoId: string) =>
     httpService.get<PipelineRun[]>(`/integrations/github/repositories/${repoId}/runs`),
@@ -41,8 +40,7 @@ export const apiService = {
   gitlabCallback: (code: string) =>
     httpService.post<AuthResponse>('/integrations/gitlab/callback', { code }),
 
-  getGitLabRepositories: () =>
-    httpService.get<Repository[]>('/integrations/gitlab/repositories'),
+  getGitLabRepositories: () => httpService.get<Repository[]>('/integrations/gitlab/repositories'),
 
   getGitLabPipelineRuns: (repoId: string) =>
     httpService.get<PipelineRun[]>(`/integrations/gitlab/repositories/${repoId}/runs`),
