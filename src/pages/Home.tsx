@@ -63,12 +63,12 @@ export function Home() {
     setIsVisible(true);
   }, []);
 
-  const handleGetStarted = () => {
-    if (currentPipeline) {
-      navigate('/visualize');
-    } else {
-      navigate('/upload');
-    }
+  const handleTryDemo = () => {
+    navigate('/visualize?demo=true');
+  };
+
+  const handleViewVisualization = () => {
+    navigate('/visualize');
   };
 
   return (
@@ -117,28 +117,43 @@ export function Home() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-scale-in" style={{ animationDelay: '0.2s' }}>
-              <button
-                onClick={handleGetStarted}
-                className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {currentPipeline ? 'View Visualization' : 'Get Started Free'}
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              </button>
-
-              <Link to="/visualize">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300"
+              {currentPipeline ? (
+                <button
+                  onClick={handleViewVisualization}
+                  className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
                 >
-                  <span className="flex items-center gap-2">
-                    🎮 Try Interactive Demo
+                  <span className="relative z-10 flex items-center gap-2">
+                    View Your Pipeline
+                    <span className="group-hover:translate-x-1 transition-transform">→</span>
                   </span>
-                </Button>
-              </Link>
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={handleTryDemo}
+                    className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 overflow-hidden"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      🎮 Try Interactive Demo
+                      <span className="group-hover:translate-x-1 transition-transform">→</span>
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </button>
+
+                  <Link to="/upload">
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300"
+                    >
+                      <span className="flex items-center gap-2">
+                        📤 Upload Your Pipeline
+                      </span>
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Stats */}
@@ -174,7 +189,7 @@ export function Home() {
               See It In Action
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Watch a live pipeline flow visualization - all rendered client-side with buttery smooth animations
+              This mini animation shows pipeline flow. Click "Try Interactive Demo" above to explore the full D3.js visualization with drag, zoom, and click interactions!
             </p>
           </div>
 
@@ -186,6 +201,12 @@ export function Home() {
             <p className="text-sm text-gray-500 dark:text-gray-400">
               ✨ Real-time updates • 🎨 Smooth animations • 🚀 Zero API calls needed
             </p>
+            <button
+              onClick={handleTryDemo}
+              className="mt-4 text-blue-600 dark:text-blue-400 font-medium hover:underline"
+            >
+              Try the full interactive demo →
+            </button>
           </div>
         </Container>
       </section>
@@ -237,27 +258,28 @@ export function Home() {
             </div>
 
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Elevate Your Workflow?
+              Ready to Visualize Your Pipelines?
             </h2>
 
             <p className="text-xl text-white/90 mb-8">
-              Upload your YAML configuration and experience the future of pipeline visualization
+              Start with our interactive demo or upload your own CI/CD configuration
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/upload">
-                <button className="group px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
-                  <span className="flex items-center gap-2">
-                    📤 Upload Configuration
-                    <span className="group-hover:translate-x-1 transition-transform">→</span>
-                  </span>
-                </button>
-              </Link>
+              <button
+                onClick={handleTryDemo}
+                className="group px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+              >
+                <span className="flex items-center gap-2">
+                  🎮 Try Demo Pipeline
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                </span>
+              </button>
 
-              <Link to="/visualize">
+              <Link to="/upload">
                 <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white border-2 border-white/30 font-semibold rounded-xl hover:bg-white/20 transition-all duration-300">
                   <span className="flex items-center gap-2">
-                    👀 View Demo First
+                    📤 Upload Your Own
                   </span>
                 </button>
               </Link>
