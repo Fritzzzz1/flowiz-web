@@ -1,9 +1,11 @@
 import { Component, ReactNode, ErrorInfo } from 'react';
-import { Button } from '@components/ui/Button';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
 
 interface Props {
   children: ReactNode;
-  fallback?: React.ComponentType<{ error: Error; resetError: () => void }>;
+  fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
 interface State {
@@ -11,59 +13,92 @@ interface State {
   error: Error | null;
 }
 
+/**
+ * ErrorBoundary component catches JavaScript errors anywhere in the child component tree,
+ * logs those errors, and displays a fallback UI instead of the component tree that crashed.
+ */
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = {
+      hasError: false,
+      error: null,
+    };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return { hasError: true, error };
+    // Update state so the next render will show the fallback UI
+    return {
+      hasError: true,
+      error,
+    };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Log the error to an error reporting service
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+
+    // Call optional error callback
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo);
+    }
   }
 
-  resetError = () => {
-    this.setState({ hasError: false, error: null });
+  handleReset = () => {
+    this.setState({
+      hasError: false,
+      error: null,
+    });
   };
 
   render() {
-    if (this.state.hasError && this.state.error) {
+    if (this.state.hasError) {
+      // Custom fallback UI
       if (this.props.fallback) {
-        const FallbackComponent = this.props.fallback;
-        return <FallbackComponent error={this.state.error} resetError={this.resetError} />;
+        return this.props.fallback;
       }
 
+      // Default fallback UI
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-          <div className="max-w-md w-full text-center">
-            <div className="mb-6">
-              <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-red-600 dark:text-red-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
-                </svg>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+          <Card className="max-w-2xl w-full">
+            <div className="text-center space-y-6">
+              <div className="text-6xl">⚠️</div>
+
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                  Oops! Something went wrong
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  We encountered an unexpected error. Don't worry, our team has been notified.
+                </p>
+              </div>
+
+              {this.state.error && (
+                <details className="text-left">
+                  <summary className="cursor-pointer text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
+                    View error details
+                  </summary>
+                  <div className="mt-4 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                    <pre className="text-xs text-red-600 dark:text-red-400 overflow-auto">
+                      {this.state.error.toString()}
+                      {'\n\n'}
+                      {this.state.error.stack}
+                    </pre>
+                  </div>
+                </details>
+              )}
+
+              <div className="flex gap-4 justify-center">
+                <Button onClick={this.handleReset} variant="primary">
+                  Try Again
+                </Button>
+                <Button onClick={() => (window.location.href = '/')} variant="secondary">
+                  Go to Home
+                </Button>
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              Something went wrong
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {this.state.error.message || 'An unexpected error occurred'}
-            </p>
-            <Button onClick={this.resetError}>Try Again</Button>
-          </div>
+          </Card>
         </div>
       );
     }
