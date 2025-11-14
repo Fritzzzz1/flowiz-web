@@ -18,6 +18,7 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
@@ -104,6 +105,10 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  const dismissToast = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  }, []);
+
   const showToast = useCallback((options: Omit<Toast, 'id'>) => {
     const id = Math.random().toString(36).substring(2, 9);
     const toast: Toast = { id, duration: 5000, ...options };
@@ -115,11 +120,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         dismissToast(id);
       }, toast.duration);
     }
-  }, []);
-
-  const dismissToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
-  }, []);
+  }, [dismissToast]);
 
   return (
     <ToastContext.Provider value={{ showToast, dismissToast }}>
