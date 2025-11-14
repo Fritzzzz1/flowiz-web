@@ -1,6 +1,15 @@
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ThemeProvider } from '@hooks/useTheme';
+import { ToastProvider } from '@components/ui/Toast';
+import { ErrorBoundary } from '@components/common/ErrorBoundary';
+import { Header } from '@components/layout/Header';
+import { Home } from '@pages/Home';
+import { Upload } from '@pages/Upload';
+import { Visualize } from '@pages/Visualize';
+import { Dashboard } from '@pages/Dashboard';
+import { Integrations } from '@pages/Integrations';
 
 // Create Query Client
 const queryClient = new QueryClient({
@@ -15,29 +24,29 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <div className="min-h-screen bg-white dark:bg-gray-900">
-          <div className="flex items-center justify-center h-screen">
-            <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-                FloWiz Web
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
-                CI/CD Pipeline Visualization Tool
-              </p>
-              <div className="animate-pulse">
-                <div className="w-16 h-16 mx-auto border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <ToastProvider>
+            <BrowserRouter>
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                <Header />
+                <main>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/upload" element={<Upload />} />
+                    <Route path="/visualize" element={<Visualize />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/integrations" element={<Integrations />} />
+                  </Routes>
+                </main>
               </div>
-              <p className="mt-4 text-sm text-gray-500 dark:text-gray-500">
-                Setting up...
-              </p>
-            </div>
-          </div>
-        </div>
-      </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+            </BrowserRouter>
+            <ReactQueryDevtools initialIsOpen={false} />
+          </ToastProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
