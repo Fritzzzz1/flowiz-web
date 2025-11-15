@@ -7,7 +7,7 @@ export interface ApiError {
 
 // Parse request and response
 export interface ParseRequest {
-  platform: 'github' | 'gitlab';
+  platform: 'github-actions' | 'gitlab-ci';
   yamlContent: string;
 }
 
@@ -33,7 +33,7 @@ export interface Step {
 
 export interface ParseResponse {
   id: string;
-  platform: 'github' | 'gitlab';
+  platform: 'github-actions' | 'gitlab-ci';
   name: string;
   jobs: Job[];
   metadata: {

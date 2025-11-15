@@ -6,7 +6,7 @@ import { ParseResponse } from '../types/api.types';
 
 export const mockGitHubPipeline: ParseResponse = {
   id: 'mock-gh-1',
-  platform: 'github',
+  platform: 'github-actions',
   name: 'CI/CD Pipeline',
   jobs: [
     {
@@ -85,7 +85,7 @@ export const mockGitHubPipeline: ParseResponse = {
 
 export const mockGitLabPipeline: ParseResponse = {
   id: 'mock-gl-1',
-  platform: 'gitlab',
+  platform: 'gitlab-ci',
   name: 'GitLab CI Pipeline',
   jobs: [
     {
@@ -154,7 +154,7 @@ export const mockGitLabPipeline: ParseResponse = {
 
 export const mockComplexPipeline: ParseResponse = {
   id: 'mock-complex-1',
-  platform: 'github',
+  platform: 'github-actions',
   name: 'E-Commerce Microservices CI/CD',
   jobs: [
     {

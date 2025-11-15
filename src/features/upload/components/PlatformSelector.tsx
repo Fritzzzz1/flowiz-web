@@ -1,8 +1,8 @@
 import { clsx } from 'clsx';
 
 export interface PlatformSelectorProps {
-  value: 'github' | 'gitlab';
-  onChange: (platform: 'github' | 'gitlab') => void;
+  value: 'github-actions' | 'gitlab-ci';
+  onChange: (platform: 'github-actions' | 'gitlab-ci') => void;
 }
 
 export function PlatformSelector({ value, onChange }: PlatformSelectorProps) {
@@ -14,10 +14,10 @@ export function PlatformSelector({ value, onChange }: PlatformSelectorProps) {
       <div className="grid grid-cols-2 gap-4">
         <button
           type="button"
-          onClick={() => onChange('github')}
+          onClick={() => onChange('github-actions')}
           className={clsx(
             'flex items-center justify-center gap-3 p-4 rounded-lg border-2 transition-all',
-            value === 'github'
+            value === 'github-actions'
               ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
               : 'border-gray-300 dark:border-gray-600 hover:border-primary-300 dark:hover:border-primary-700'
           )}
@@ -33,10 +33,10 @@ export function PlatformSelector({ value, onChange }: PlatformSelectorProps) {
 
         <button
           type="button"
-          onClick={() => onChange('gitlab')}
+          onClick={() => onChange('gitlab-ci')}
           className={clsx(
             'flex items-center justify-center gap-3 p-4 rounded-lg border-2 transition-all',
-            value === 'gitlab'
+            value === 'gitlab-ci'
               ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
               : 'border-gray-300 dark:border-gray-600 hover:border-primary-300 dark:hover:border-primary-700'
           )}

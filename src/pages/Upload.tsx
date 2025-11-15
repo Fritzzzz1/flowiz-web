@@ -8,7 +8,7 @@ import { YAMLEditor } from '@features/upload/components/YAMLEditor';
 import { useParseConfig } from '@features/upload/hooks/useParseConfig';
 
 export function Upload() {
-  const [platform, setPlatform] = useState<'github' | 'gitlab'>('github');
+  const [platform, setPlatform] = useState<'github-actions' | 'gitlab-ci'>('github-actions');
   const [yamlContent, setYamlContent] = useState('');
   const [fileName, setFileName] = useState<string | null>(null);
 
