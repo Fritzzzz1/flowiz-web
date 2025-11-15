@@ -9,9 +9,10 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const variantClasses = {
-  default: 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700',
-  outlined: 'bg-transparent border-2 border-gray-300 dark:border-gray-600',
-  elevated: 'bg-white dark:bg-gray-800 shadow-lg border-none',
+  default:
+    'bg-white dark:bg-dark-surface border border-slate-200 dark:border-dark-border shadow-sm',
+  outlined: 'bg-transparent border-2 border-slate-300 dark:border-slate-600',
+  elevated: 'bg-white dark:bg-dark-surface shadow-md border-none',
 };
 
 export function Card({
@@ -26,7 +27,7 @@ export function Card({
   return (
     <div
       className={clsx(
-        'rounded-lg transition-all duration-200',
+        'rounded-round transition-all duration-normal',
         variantClasses[variant],
         hoverable && 'hover:shadow-md cursor-pointer',
         className
@@ -34,11 +35,13 @@ export function Card({
       {...props}
     >
       {header && (
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">{header}</div>
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-dark-border">
+          {header}
+        </div>
       )}
       <div className="px-6 py-4">{children}</div>
       {footer && (
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-lg">
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-dark-border bg-slate-50 dark:bg-dark-bg rounded-b-round">
           {footer}
         </div>
       )}
