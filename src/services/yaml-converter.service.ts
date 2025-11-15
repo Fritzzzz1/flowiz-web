@@ -49,64 +49,62 @@ export function convertYAMLToPipeline(yamlContent: string): YAMLParseResult {
       };
     }
 
-    const jobs: Job[] = Object.entries(workflow.jobs).map(
-      ([jobId, jobConfig], index) => {
-        // Parse dependencies
-        const dependencies: string[] = [];
-        if (jobConfig.needs) {
-          if (Array.isArray(jobConfig.needs)) {
-            dependencies.push(...jobConfig.needs);
-          } else if (typeof jobConfig.needs === 'string') {
-            dependencies.push(jobConfig.needs);
-          }
+    const jobs: Job[] = Object.entries(workflow.jobs).map(([jobId, jobConfig], index) => {
+      // Parse dependencies
+      const dependencies: string[] = [];
+      if (jobConfig.needs) {
+        if (Array.isArray(jobConfig.needs)) {
+          dependencies.push(...jobConfig.needs);
+        } else if (typeof jobConfig.needs === 'string') {
+          dependencies.push(jobConfig.needs);
         }
-
-        // Convert steps
-        const steps =
-          jobConfig.steps?.map((step) => {
-            // Convert 'with' values to strings
-            let withConfig: Record<string, string> | undefined;
-            if (step.with && typeof step.with === 'object') {
-              withConfig = Object.entries(step.with).reduce(
-                (acc, [key, value]) => {
-                  acc[key] = String(value);
-                  return acc;
-                },
-                {} as Record<string, string>
-              );
-            }
-
-            return {
-              name: step.name || step.run || step.uses || 'Unnamed step',
-              run: step.run,
-              uses: step.uses,
-              with: withConfig,
-            };
-          }) || [];
-
-        // Parse environment
-        let environment: Record<string, string> | undefined;
-        if (jobConfig.environment) {
-          if (typeof jobConfig.environment === 'string') {
-            environment = { name: jobConfig.environment };
-          } else if (typeof jobConfig.environment === 'object') {
-            environment = jobConfig.environment as Record<string, string>;
-          }
-        }
-
-        return {
-          id: jobId,
-          name: jobConfig.name || jobId,
-          dependencies,
-          steps,
-          environment,
-          runsOn: jobConfig['runs-on'],
-          // Calculate position based on dependencies for better layout
-          x: dependencies.length * 250 + 100,
-          y: index * 100 + 50,
-        };
       }
-    );
+
+      // Convert steps
+      const steps =
+        jobConfig.steps?.map((step) => {
+          // Convert 'with' values to strings
+          let withConfig: Record<string, string> | undefined;
+          if (step.with && typeof step.with === 'object') {
+            withConfig = Object.entries(step.with).reduce(
+              (acc, [key, value]) => {
+                acc[key] = String(value);
+                return acc;
+              },
+              {} as Record<string, string>
+            );
+          }
+
+          return {
+            name: step.name || step.run || step.uses || 'Unnamed step',
+            run: step.run,
+            uses: step.uses,
+            with: withConfig,
+          };
+        }) || [];
+
+      // Parse environment
+      let environment: Record<string, string> | undefined;
+      if (jobConfig.environment) {
+        if (typeof jobConfig.environment === 'string') {
+          environment = { name: jobConfig.environment };
+        } else if (typeof jobConfig.environment === 'object') {
+          environment = jobConfig.environment as Record<string, string>;
+        }
+      }
+
+      return {
+        id: jobId,
+        name: jobConfig.name || jobId,
+        dependencies,
+        steps,
+        environment,
+        runsOn: jobConfig['runs-on'],
+        // Calculate position based on dependencies for better layout
+        x: dependencies.length * 250 + 100,
+        y: index * 100 + 50,
+      };
+    });
 
     const parseResponse: ParseResponse = {
       id: `demo-${Date.now()}`,
@@ -126,10 +124,7 @@ export function convertYAMLToPipeline(yamlContent: string): YAMLParseResult {
   } catch (error) {
     return {
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : 'Failed to parse YAML workflow',
+      error: error instanceof Error ? error.message : 'Failed to parse YAML workflow',
     };
   }
 }

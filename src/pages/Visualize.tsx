@@ -7,10 +7,7 @@ import { PipelineGraph } from '@features/visualization/components/PipelineGraph'
 import { usePipelineStore } from '@store/pipeline.store';
 import { YAMLEditorPanel } from '@components/YAMLEditorPanel';
 import { DEMO_WORKFLOW_YAML } from '@/mocks/demo-workflow.yaml';
-import {
-  convertYAMLToPipeline,
-  convertPipelineToYAML,
-} from '@services/yaml-converter.service';
+import { convertYAMLToPipeline, convertPipelineToYAML } from '@services/yaml-converter.service';
 
 export function Visualize() {
   const [searchParams] = useSearchParams();
@@ -204,24 +201,21 @@ export function Visualize() {
         {/* Instructions */}
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <h3 className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-2">
-            {isDemoMode
-              ? 'Interactive Demo Features:'
-              : 'How to interact with the diagram:'}
+            {isDemoMode ? 'Interactive Demo Features:' : 'How to interact with the diagram:'}
           </h3>
           <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-1">
             {isDemoMode && (
               <>
                 <li>
-                  • <strong>Edit YAML:</strong> Modify the workflow on the left to see live
-                  updates on the right
+                  • <strong>Edit YAML:</strong> Modify the workflow on the left to see live updates
+                  on the right
                 </li>
                 <li>
-                  • <strong>Syntax Validation:</strong> Invalid YAML will be highlighted with
-                  error messages
+                  • <strong>Syntax Validation:</strong> Invalid YAML will be highlighted with error
+                  messages
                 </li>
                 <li>
-                  • <strong>Add/Remove Jobs:</strong> Try adding new jobs or changing
-                  dependencies
+                  • <strong>Add/Remove Jobs:</strong> Try adding new jobs or changing dependencies
                 </li>
               </>
             )}

@@ -53,21 +53,14 @@ export function YAMLEditorPanel({
       <div className="border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Workflow YAML
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Workflow YAML</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {value.length} characters • {editorMounted ? 'Editor loaded' : 'Loading...'}
             </p>
           </div>
           {localError && (
             <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -80,12 +73,7 @@ export function YAMLEditorPanel({
           )}
           {!localError && value.trim() && (
             <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -124,9 +112,7 @@ export function YAMLEditorPanel({
           }}
           loading={
             <div className="flex h-full items-center justify-center">
-              <div className="text-gray-500 dark:text-gray-400">
-                Loading Monaco Editor...
-              </div>
+              <div className="text-gray-500 dark:text-gray-400">Loading Monaco Editor...</div>
             </div>
           }
         />
@@ -153,9 +139,7 @@ export function YAMLEditorPanel({
               <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
                 YAML Syntax Error
               </h3>
-              <p className="mt-1 text-sm text-red-700 dark:text-red-400">
-                {localError}
-              </p>
+              <p className="mt-1 text-sm text-red-700 dark:text-red-400">{localError}</p>
             </div>
           </div>
         </div>
@@ -164,8 +148,8 @@ export function YAMLEditorPanel({
       {/* Help Text */}
       <div className="border-t border-gray-200 bg-gray-50 px-4 py-2 text-xs text-gray-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-400">
         <p>
-          Edit the workflow YAML to see the diagram update in real-time. The
-          diagram will automatically reflect your changes.
+          Edit the workflow YAML to see the diagram update in real-time. The diagram will
+          automatically reflect your changes.
         </p>
       </div>
     </div>
