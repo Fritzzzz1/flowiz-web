@@ -169,16 +169,16 @@ export function Visualize() {
         {isDemoMode && showYamlEditor ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* YAML Editor */}
-            <Card className="h-[800px]">
+            <div className="h-[800px] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
               <YAMLEditorPanel
                 value={yamlContent}
                 onChange={handleYAMLChange}
                 onError={setYamlError}
               />
-            </Card>
+            </div>
 
             {/* Graph Visualization */}
-            <Card className="h-[800px]">
+            <div className="h-[800px] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden">
               <div className="flex h-full flex-col">
                 <div className="border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -192,7 +192,7 @@ export function Visualize() {
                   <PipelineGraph pipeline={currentPipeline} />
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         ) : (
           /* Full Width Graph for non-demo mode */
