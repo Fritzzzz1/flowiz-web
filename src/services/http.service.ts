@@ -105,7 +105,12 @@ class HttpService {
     const response = await this.client.post<T>(url, data, config);
     // Check if this is a wrapped API response and unwrap it
     const responseData = response.data as ApiResponseWrapper | T;
-    if (responseData && typeof responseData === 'object' && 'success' in responseData && 'data' in responseData) {
+    if (
+      responseData &&
+      typeof responseData === 'object' &&
+      'success' in responseData &&
+      'data' in responseData
+    ) {
       const wrappedResponse = responseData as ApiResponseWrapper;
       // For parse endpoint, extract the pipeline from the nested structure
       if (wrappedResponse.data?.pipeline) {
@@ -128,10 +133,11 @@ class HttpService {
             }
 
             // Normalize steps: convert 'command' to 'run' if present
-            const steps = job.steps?.map((step) => ({
-              ...step,
-              run: step.run || step.command,
-            })) || [];
+            const steps =
+              job.steps?.map((step) => ({
+                ...step,
+                run: step.run || step.command,
+              })) || [];
 
             return {
               ...job,
