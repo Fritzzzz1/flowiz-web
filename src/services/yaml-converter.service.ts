@@ -108,7 +108,7 @@ export function convertYAMLToPipeline(yamlContent: string): YAMLParseResult {
 
     const parseResponse: ParseResponse = {
       id: `demo-${Date.now()}`,
-      platform: 'github',
+      platform: 'github-actions',
       name: workflow.name || 'GitHub Workflow',
       jobs,
       metadata: {
