@@ -34,6 +34,8 @@ export function useD3Graph(
 
     if (layout === 'force') {
       graphService.renderForceDirectedLayout(pipeline, onNodeClick);
+    } else if (layout === 'hierarchical') {
+      graphService.renderHierarchicalLayout(pipeline, onNodeClick);
     }
     // Add other layouts here in the future
   }, [pipeline, layout, isReady, onNodeClick]);
