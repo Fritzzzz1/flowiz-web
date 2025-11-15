@@ -99,7 +99,7 @@ export function Visualize() {
                 {currentPipeline.name}
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                {currentPipeline.platform === 'github' ? 'GitHub Actions' : 'GitLab CI'} •{' '}
+                {currentPipeline.platform === 'github-actions' ? 'GitHub Actions' : 'GitLab CI'} •{' '}
                 {currentPipeline.metadata.totalJobs} jobs
                 {isDemo && ' • Demo Data'}
               </p>
