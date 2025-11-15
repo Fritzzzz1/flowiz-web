@@ -18,6 +18,7 @@ export function YAMLEditorPanel({
 }: YAMLEditorPanelProps) {
   const { theme } = useTheme();
   const [localError, setLocalError] = useState<string | null>(null);
+  const [editorMounted, setEditorMounted] = useState(false);
 
   // Validate YAML whenever it changes
   useEffect(() => {
@@ -42,14 +43,23 @@ export function YAMLEditorPanel({
     [onChange]
   );
 
+  const handleEditorMount = useCallback(() => {
+    setEditorMounted(true);
+  }, []);
+
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Workflow YAML
-          </h2>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Workflow YAML
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {value.length} characters • {editorMounted ? 'Editor loaded' : 'Loading...'}
+            </p>
+          </div>
           {localError && (
             <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
               <svg
@@ -93,9 +103,10 @@ export function YAMLEditorPanel({
       <div className="flex-1 overflow-hidden">
         <Editor
           height="100%"
-          defaultLanguage="yaml"
-          value={value}
+          language="yaml"
+          defaultValue={value}
           onChange={handleEditorChange}
+          onMount={handleEditorMount}
           theme={theme === 'dark' ? 'vs-dark' : 'light'}
           options={{
             readOnly,
@@ -114,7 +125,7 @@ export function YAMLEditorPanel({
           loading={
             <div className="flex h-full items-center justify-center">
               <div className="text-gray-500 dark:text-gray-400">
-                Loading editor...
+                Loading Monaco Editor...
               </div>
             </div>
           }
