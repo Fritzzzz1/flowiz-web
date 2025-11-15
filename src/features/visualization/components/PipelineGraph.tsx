@@ -12,7 +12,7 @@ export interface PipelineGraphProps {
 
 export function PipelineGraph({ pipeline }: PipelineGraphProps) {
   const [selectedNode, setSelectedNode] = useState<Job | null>(null);
-  const [layout, setLayout] = useState<GraphLayout>('force');
+  const [layout, setLayout] = useState<GraphLayout>('hierarchical');
 
   const { svgRef, zoomIn, zoomOut, resetZoom, isReady } = useD3Graph(
     pipeline,
