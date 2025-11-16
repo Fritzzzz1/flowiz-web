@@ -191,7 +191,7 @@ export class D3GraphService {
   ) {
     const { nodes, edges } = this.transformData(pipeline);
 
-    // Setup gradients for each job type if not already done
+    // Setup gradients for each job type
     const defs = this.svg.select('defs');
     const jobTypes: JobType[] = ['setup', 'build', 'test', 'security', 'deploy', 'other'];
 
@@ -199,10 +199,12 @@ export class D3GraphService {
       if (defs.select(`#gradient-force-${type}`).empty()) {
         const colors = this.getJobTypeColor(type);
         const gradient = defs
-          .append('radialGradient')
+          .append('linearGradient')
           .attr('id', `gradient-force-${type}`)
-          .attr('cx', '30%')
-          .attr('cy', '30%');
+          .attr('x1', '0%')
+          .attr('y1', '0%')
+          .attr('x2', '100%')
+          .attr('y2', '100%');
 
         gradient
           .append('stop')
@@ -218,10 +220,14 @@ export class D3GraphService {
       }
     });
 
+    // Node dimensions (same as hierarchical layout)
+    const nodeWidth = 200;
+    const nodeHeight = 100;
+
     // Check if nodes have predefined positions (demo mode)
     const hasInitialPositions = nodes.some((n) => n.x !== undefined && n.y !== undefined);
 
-    // Create force simulation with weaker forces if using initial positions
+    // Create force simulation with grid constraints
     this.simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -229,15 +235,15 @@ export class D3GraphService {
         d3
           .forceLink<NodeDatum, EdgeDatum>(edges)
           .id((d) => d.id)
-          .distance(hasInitialPositions ? 250 : 200)
-          .strength(hasInitialPositions ? 0.3 : 1)
+          .distance(250)
+          .strength(0.5)
       )
-      .force('charge', d3.forceManyBody().strength(hasInitialPositions ? -150 : -400))
+      .force('charge', d3.forceManyBody().strength(-800))
       .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-      .force('collision', d3.forceCollide().radius(80))
+      .force('collision', d3.forceCollide().radius(120))
       .alphaDecay(hasInitialPositions ? 0.05 : 0.0228);
 
-    // Render edges with smooth curves
+    // Render edges with orthogonal paths
     const link = this.g
       .append('g')
       .attr('class', 'edges')
@@ -246,9 +252,9 @@ export class D3GraphService {
       .join('path')
       .attr('class', 'edge')
       .attr('fill', 'none')
-      .attr('stroke', '#cbd5e1')
+      .attr('stroke', '#94a3b8')
       .attr('stroke-width', 2.5)
-      .attr('opacity', 0.6)
+      .attr('opacity', 0.7)
       .attr('marker-end', 'url(#arrowhead)');
 
     // Render nodes
@@ -275,7 +281,7 @@ export class D3GraphService {
               typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
             const target =
               typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? '#3b82f6' : '#cbd5e1';
+            return source === d.id || target === d.id ? '#3b82f6' : '#94a3b8';
           })
           .attr('stroke-width', (l) => {
             const linkData = l as unknown as EdgeDatum;
@@ -296,54 +302,88 @@ export class D3GraphService {
       })
       .on('mouseleave', () => {
         if (onNodeHover) onNodeHover(null);
-        link.attr('stroke', '#cbd5e1').attr('stroke-width', 2.5).attr('opacity', 0.6);
+        link.attr('stroke', '#94a3b8').attr('stroke-width', 2.5).attr('opacity', 0.7);
       });
 
-    // Add circular background with gradient
+    // Add rounded rectangles with gradients (same as hierarchical layout)
     node
-      .append('circle')
-      .attr('r', 60)
+      .append('rect')
+      .attr('width', nodeWidth)
+      .attr('height', nodeHeight)
+      .attr('x', -nodeWidth / 2)
+      .attr('y', -nodeHeight / 2)
+      .attr('rx', 12)
+      .attr('ry', 12)
       .attr('fill', (d) => `url(#gradient-force-${d.jobType})`)
       .attr('stroke', (d) => this.getJobTypeColor(d.jobType || 'other').stroke)
-      .attr('stroke-width', 3)
-      .attr('filter', 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))');
+      .attr('stroke-width', 2.5)
+      .attr('filter', 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15))');
 
-    // Add job type indicator arc
+    // Add job type badge
     node
-      .append('circle')
-      .attr('r', 48)
-      .attr('fill', 'none')
-      .attr('stroke', 'rgba(255, 255, 255, 0.3)')
-      .attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', '4 4');
+      .append('rect')
+      .attr('width', 70)
+      .attr('height', 22)
+      .attr('x', -nodeWidth / 2 + 8)
+      .attr('y', -nodeHeight / 2 + 8)
+      .attr('rx', 4)
+      .attr('ry', 4)
+      .attr('fill', 'rgba(0, 0, 0, 0.2)')
+      .attr('pointer-events', 'none');
 
-    // Add main job name
     node
       .append('text')
-      .text((d) => this.truncateLabel(d.name, 12))
+      .text((d) => (d.jobType || 'other').toUpperCase())
+      .attr('x', -nodeWidth / 2 + 43)
+      .attr('y', -nodeHeight / 2 + 21)
       .attr('text-anchor', 'middle')
-      .attr('dy', '-0.2em')
-      .attr('fill', '#fff')
-      .attr('font-size', '13px')
+      .attr('fill', '#ffffff')
+      .attr('font-size', '10px')
       .attr('font-weight', '700')
-      .attr('pointer-events', 'none')
-      .style('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.4)');
+      .attr('pointer-events', 'none');
 
-    // Add step count below name
+    // Add job names
+    node
+      .append('text')
+      .text((d) => this.truncateLabel(d.name, 25))
+      .attr('x', 0)
+      .attr('y', 8)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', '#ffffff')
+      .attr('font-size', '15px')
+      .attr('font-weight', '600')
+      .attr('pointer-events', 'none')
+      .style('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)');
+
+    // Add step count
     node
       .append('text')
       .text((d) => `${d.steps.length} step${d.steps.length !== 1 ? 's' : ''}`)
+      .attr('x', 0)
+      .attr('y', nodeHeight / 2 - 12)
       .attr('text-anchor', 'middle')
-      .attr('dy', '1.2em')
-      .attr('fill', 'rgba(255, 255, 255, 0.85)')
-      .attr('font-size', '10px')
+      .attr('fill', 'rgba(255, 255, 255, 0.8)')
+      .attr('font-size', '11px')
       .attr('font-weight', '500')
-      .attr('pointer-events', 'none')
-      .style('text-shadow', '0 1px 2px rgba(0, 0, 0, 0.3)');
+      .attr('pointer-events', 'none');
 
-    // Update positions on tick
+    // Add dependency count if any
+    node
+      .filter((d) => d.dependencies.length > 0)
+      .append('text')
+      .text((d) => `↓ ${d.dependencies.length}`)
+      .attr('x', nodeWidth / 2 - 8)
+      .attr('y', -nodeHeight / 2 + 21)
+      .attr('text-anchor', 'end')
+      .attr('fill', 'rgba(255, 255, 255, 0.7)')
+      .attr('font-size', '10px')
+      .attr('font-weight', '600')
+      .attr('pointer-events', 'none');
+
+    // Update positions on tick with orthogonal edge routing
     this.simulation.on('tick', () => {
-      // Draw curved paths for edges
+      // Draw orthogonal paths for edges
       link.attr('d', (d) => {
         const source = d.source as NodeDatum;
         const target = d.target as NodeDatum;
@@ -352,12 +392,25 @@ export class D3GraphService {
         const tx = target.x || 0;
         const ty = target.y || 0;
 
-        // Create a gentle curve
-        const dx = tx - sx;
-        const dy = ty - sy;
-        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        // Determine if we should route horizontally or vertically first
+        const dx = Math.abs(tx - sx);
+        const dy = Math.abs(ty - sy);
 
-        return `M ${sx},${sy} A ${dr},${dr} 0 0,1 ${tx},${ty}`;
+        if (dx > dy) {
+          // Route horizontally first
+          const midX = (sx + tx) / 2;
+          return `M ${sx},${sy}
+                  L ${midX},${sy}
+                  L ${midX},${ty}
+                  L ${tx},${ty}`;
+        } else {
+          // Route vertically first
+          const midY = (sy + ty) / 2;
+          return `M ${sx},${sy}
+                  L ${sx},${midY}
+                  L ${tx},${midY}
+                  L ${tx},${ty}`;
+        }
       });
 
       node.attr('transform', (d) => `translate(${d.x || 0},${d.y || 0})`);
@@ -481,7 +534,7 @@ export class D3GraphService {
       });
     });
 
-    // Render edges with smooth Bezier curves
+    // Render edges with orthogonal (90-degree) paths
     const link = this.g
       .append('g')
       .attr('class', 'edges')
@@ -490,9 +543,9 @@ export class D3GraphService {
       .join('path')
       .attr('class', 'edge')
       .attr('fill', 'none')
-      .attr('stroke', '#cbd5e1')
+      .attr('stroke', '#94a3b8')
       .attr('stroke-width', 2.5)
-      .attr('opacity', 0.6)
+      .attr('opacity', 0.7)
       .attr('marker-end', 'url(#arrowhead)');
 
     // Setup gradients for each job type
@@ -567,7 +620,7 @@ export class D3GraphService {
       })
       .on('mouseleave', () => {
         if (onNodeHover) onNodeHover(null);
-        link.attr('stroke', '#cbd5e1').attr('stroke-width', 2.5).attr('opacity', 0.6);
+        link.attr('stroke', '#94a3b8').attr('stroke-width', 2.5).attr('opacity', 0.7);
       });
 
     // Add rounded rectangles with gradients based on job type
@@ -648,7 +701,7 @@ export class D3GraphService {
       .attr('font-weight', '600')
       .attr('pointer-events', 'none');
 
-    // Update edge paths to draw smooth Bezier curves (horizontal flow)
+    // Update edge paths to draw orthogonal (90-degree) paths
     link.attr('d', (d) => {
       const source = d.source as NodeDatum;
       const target = d.target as NodeDatum;
@@ -658,13 +711,14 @@ export class D3GraphService {
       const targetX = (target.x || 0) - nodeWidth / 2;
       const targetY = target.y || 0;
 
-      // Horizontal Bezier curve
-      const controlPointOffset = Math.min(100, Math.abs(targetX - sourceX) / 2);
+      // Calculate midpoint for orthogonal routing
+      const midX = (sourceX + targetX) / 2;
 
+      // Draw orthogonal path: horizontal -> vertical -> horizontal
       return `M ${sourceX},${sourceY}
-              C ${sourceX + controlPointOffset},${sourceY}
-                ${targetX - controlPointOffset},${targetY}
-                ${targetX},${targetY}`;
+              L ${midX},${sourceY}
+              L ${midX},${targetY}
+              L ${targetX},${targetY}`;
     });
   }
 
