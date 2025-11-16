@@ -9,23 +9,23 @@
 /* CSS Custom Properties for Theme System */
 :root {
   /* Light Mode Colors */
-  --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F5F6F7;
-  --color-bg-tertiary: #F9FAFB;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f5f6f7;
+  --color-bg-tertiary: #f9fafb;
   --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
-  --color-border: #E5E7EB;
-  --color-border-light: #F3F4F6;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
 
   /* Semantic Colors */
-  --color-primary: #0078D4;
-  --color-primary-hover: #0066B2;
-  --color-primary-active: #004A8F;
-  --color-success: #10B981;
-  --color-warning: #F59E0B;
-  --color-danger: #EF4444;
-  --color-info: #06B6D4;
+  --color-primary: #0078d4;
+  --color-primary-hover: #0066b2;
+  --color-primary-active: #004a8f;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #06b6d4;
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -37,13 +37,13 @@
 /* Dark Mode Theme */
 [data-theme='dark'],
 .dark {
-  --color-bg-primary: #0F1119;
-  --color-bg-secondary: #1A1D23;
-  --color-bg-tertiary: #2D3139;
-  --color-text-primary: #E8EAED;
-  --color-text-secondary: #9CA3AF;
-  --color-text-tertiary: #6B7280;
-  --color-border: #2D3139;
+  --color-bg-primary: #0f1119;
+  --color-bg-secondary: #1a1d23;
+  --color-bg-tertiary: #2d3139;
+  --color-text-primary: #e8eaed;
+  --color-text-secondary: #9ca3af;
+  --color-text-tertiary: #6b7280;
+  --color-border: #2d3139;
   --color-border-light: #374151;
 
   /* Dark mode shadows */
@@ -80,7 +80,14 @@
 
   html {
     @apply antialiased;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
   }
 
   body {
@@ -88,36 +95,75 @@
     color: var(--color-text-primary);
     font-size: 16px;
     line-height: 1.6;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
   }
 
   /* Typography Defaults */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 600;
     line-height: 1.3;
     color: var(--color-text-primary);
   }
 
-  h1 { font-size: 48px; font-weight: 700; letter-spacing: -0.02em; }
-  h2 { font-size: 40px; font-weight: 700; letter-spacing: -0.01em; }
-  h3 { font-size: 33px; }
-  h4 { font-size: 28px; }
-  h5 { font-size: 23px; }
-  h6 { font-size: 19px; font-weight: 500; }
+  h1 {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  h3 {
+    font-size: 33px;
+  }
+  h4 {
+    font-size: 28px;
+  }
+  h5 {
+    font-size: 23px;
+  }
+  h6 {
+    font-size: 19px;
+    font-weight: 500;
+  }
 
   /* Responsive Typography */
   @media (max-width: 768px) {
-    h1 { font-size: 32px; }
-    h2 { font-size: 28px; }
-    h3 { font-size: 24px; }
-    h4 { font-size: 20px; }
-    h5 { font-size: 18px; }
-    h6 { font-size: 16px; }
-    body { font-size: 14px; }
+    h1 {
+      font-size: 32px;
+    }
+    h2 {
+      font-size: 28px;
+    }
+    h3 {
+      font-size: 24px;
+    }
+    h4 {
+      font-size: 20px;
+    }
+    h5 {
+      font-size: 18px;
+    }
+    h6 {
+      font-size: 16px;
+    }
+    body {
+      font-size: 14px;
+    }
   }
 
   /* Code Elements */
-  code, pre {
+  code,
+  pre {
     font-family: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Courier New', monospace;
   }
 
@@ -249,7 +295,7 @@
   }
 
   .btn-danger:hover:not(:disabled) {
-    background: #DC2626;
+    background: #dc2626;
   }
 
   /* Input Base */
@@ -297,23 +343,23 @@
   }
 
   .badge-success {
-    background: #D1FAE5;
-    color: #065F46;
+    background: #d1fae5;
+    color: #065f46;
   }
 
   .badge-error {
-    background: #FEE2E2;
-    color: #7F1D1D;
+    background: #fee2e2;
+    color: #7f1d1d;
   }
 
   .badge-warning {
-    background: #FEF3C7;
-    color: #78350F;
+    background: #fef3c7;
+    color: #78350f;
   }
 
   .badge-info {
-    background: #DBEAFE;
-    color: #0C4A6E;
+    background: #dbeafe;
+    color: #0c4a6e;
   }
 
   .badge-neutral {
@@ -335,27 +381,27 @@
   }
 
   .toast-success {
-    background: #D1FAE5;
-    border-left: 4px solid #10B981;
-    color: #065F46;
+    background: #d1fae5;
+    border-left: 4px solid #10b981;
+    color: #065f46;
   }
 
   .toast-error {
-    background: #FEE2E2;
-    border-left: 4px solid #EF4444;
-    color: #7F1D1D;
+    background: #fee2e2;
+    border-left: 4px solid #ef4444;
+    color: #7f1d1d;
   }
 
   .toast-warning {
-    background: #FEF3C7;
-    border-left: 4px solid #F59E0B;
-    color: #78350F;
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    color: #78350f;
   }
 
   .toast-info {
-    background: #DBEAFE;
-    border-left: 4px solid #06B6D4;
-    color: #0C4A6E;
+    background: #dbeafe;
+    border-left: 4px solid #06b6d4;
+    color: #0c4a6e;
   }
 
   /* Loading Spinner */
@@ -378,7 +424,7 @@
 
   .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #0078D4, #06B6D4);
+    background: linear-gradient(90deg, #0078d4, #06b6d4);
     transition: width 0.3s ease;
     border-radius: 4px;
   }

@@ -35,9 +35,7 @@ export function Card({
       {...props}
     >
       {header && (
-        <div className="px-6 py-4 border-b border-slate-200 dark:border-dark-border">
-          {header}
-        </div>
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-dark-border">{header}</div>
       )}
       <div className="px-6 py-4">{children}</div>
       {footer && (
