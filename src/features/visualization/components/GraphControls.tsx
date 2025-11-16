@@ -20,17 +20,17 @@ export function GraphControls({
     <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-2 border border-gray-200 dark:border-gray-700">
       {/* Zoom Controls */}
       <div className="flex flex-col gap-1">
-        <Button size="sm" onClick={onZoomIn} title="Zoom In">
+        <Button size="small" onClick={onZoomIn} title="Zoom In">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
         </Button>
-        <Button size="sm" onClick={onZoomOut} title="Zoom Out">
+        <Button size="small" onClick={onZoomOut} title="Zoom Out">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
           </svg>
         </Button>
-        <Button size="sm" onClick={onResetZoom} title="Reset Zoom">
+        <Button size="small" onClick={onResetZoom} title="Reset Zoom">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"

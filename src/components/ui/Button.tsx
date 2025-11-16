@@ -3,29 +3,40 @@ import { clsx } from 'clsx';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'small' | 'medium' | 'large';
   loading?: boolean;
   leftIcon?: ReactNode;
   rightIcon?: ReactNode;
 }
 
 const variantClasses = {
-  primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm',
+  primary:
+    'bg-primary text-white hover:bg-primary-hover active:bg-primary-active ' +
+    'disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-700 dark:disabled:text-slate-500',
   secondary:
-    'bg-gray-200 hover:bg-gray-300 text-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white',
-  ghost: 'bg-transparent hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-800 dark:text-gray-300',
-  danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm',
+    'bg-transparent text-primary border border-slate-200 ' +
+    'hover:bg-slate-50 hover:border-primary ' +
+    'active:bg-slate-100 ' +
+    'dark:border-slate-700 dark:hover:bg-slate-800 dark:active:bg-slate-700 ' +
+    'disabled:text-slate-400 disabled:border-slate-200 dark:disabled:text-slate-500 dark:disabled:border-slate-700',
+  ghost:
+    'bg-transparent hover:bg-slate-50 text-slate-700 ' +
+    'dark:hover:bg-slate-800 dark:text-slate-300 ' +
+    'disabled:text-slate-400 dark:disabled:text-slate-500',
+  danger:
+    'bg-danger text-white hover:bg-danger-hover active:bg-danger-active ' +
+    'disabled:bg-danger-100 disabled:text-danger-200',
 };
 
 const sizeClasses = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-base',
-  lg: 'px-6 py-3 text-lg',
+  small: 'px-3 py-2 text-sm min-h-[36px]',
+  medium: 'px-4 py-3 text-base min-h-[44px]',
+  large: 'px-6 py-4 text-base min-h-[52px]',
 };
 
 export function Button({
   variant = 'primary',
-  size = 'md',
+  size = 'medium',
   loading = false,
   leftIcon,
   rightIcon,
@@ -39,14 +50,16 @@ export function Button({
   return (
     <button
       className={clsx(
-        'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-200',
-        'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center gap-2 rounded-subtle font-medium transition-all duration-normal',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        'dark:focus-visible:ring-offset-dark-bg',
+        'disabled:cursor-not-allowed',
         variantClasses[variant],
         sizeClasses[size],
         className
       )}
       disabled={isDisabled}
+      aria-busy={loading}
       {...props}
     >
       {loading && (
@@ -56,6 +69,7 @@ export function Button({
           fill="none"
           viewBox="0 0 24 24"
           data-testid="spinner"
+          aria-label="Loading"
         >
           <circle
             className="opacity-25"
