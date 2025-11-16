@@ -29,10 +29,10 @@ describe('Button Component', () => {
 
   it('applies correct variant classes', () => {
     const { rerender } = render(<Button variant="primary">Primary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-primary-600');
+    expect(screen.getByRole('button')).toHaveClass('bg-primary');
 
     rerender(<Button variant="danger">Danger</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-red-600');
+    expect(screen.getByRole('button')).toHaveClass('bg-danger');
   });
 
   it('renders with left and right icons', () => {

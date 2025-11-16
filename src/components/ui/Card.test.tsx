@@ -17,7 +17,7 @@ describe('Card Component', () => {
   it('renders with elevated variant', () => {
     const { container } = render(<Card variant="elevated">Elevated</Card>);
     const card = container.firstChild as HTMLElement;
-    expect(card).toHaveClass('shadow-lg');
+    expect(card).toHaveClass('shadow-md');
   });
 
   it('combines custom className with default classes', () => {
