@@ -152,7 +152,7 @@ export function Home() {
 
                   <Link to="/upload">
                     <Button
-                      size="lg"
+                      size="large"
                       variant="secondary"
                       className="px-8 py-4 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300"
                     >

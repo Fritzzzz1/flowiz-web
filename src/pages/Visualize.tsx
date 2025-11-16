@@ -75,10 +75,10 @@ export function Visualize() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/upload">
-                <Button size="lg">📤 Upload Your Configuration</Button>
+                <Button size="large">📤 Upload Your Configuration</Button>
               </Link>
               <Link to="/visualize?demo=true">
-                <Button size="lg" variant="secondary">
+                <Button size="large" variant="secondary">
                   🎮 Try Interactive Demo
                 </Button>
               </Link>
@@ -125,7 +125,7 @@ export function Visualize() {
               <div className="flex gap-2">
                 {isDemoMode && (
                   <Button
-                    size="sm"
+                    size="small"
                     variant="secondary"
                     onClick={() => setShowYamlEditor(!showYamlEditor)}
                   >
@@ -133,7 +133,7 @@ export function Visualize() {
                   </Button>
                 )}
                 <Link to="/upload">
-                  <Button size="sm">Upload Yours</Button>
+                  <Button size="small">Upload Yours</Button>
                 </Link>
               </div>
             </div>
