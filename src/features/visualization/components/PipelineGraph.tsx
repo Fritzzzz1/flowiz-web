@@ -4,6 +4,7 @@ import { GraphLayout } from '../services/d3-graph.service';
 import { useD3Graph } from '../hooks/useD3Graph';
 import { GraphControls } from './GraphControls';
 import { NodeDetailPanel } from './NodeDetailPanel';
+import { JobTypeLegend } from './JobTypeLegend';
 import { clsx } from 'clsx';
 
 export interface PipelineGraphProps {
@@ -40,6 +41,9 @@ export function PipelineGraph({ pipeline }: PipelineGraphProps) {
         )}
         style={{ height: '800px' }}
       />
+
+      {/* Job Type Legend */}
+      <JobTypeLegend />
 
       {/* Node Detail Panel */}
       <NodeDetailPanel

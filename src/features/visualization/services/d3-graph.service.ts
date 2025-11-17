@@ -3,6 +3,8 @@ import { ParseResponse, Job } from '../../../types/api.types';
 
 export type GraphLayout = 'force' | 'hierarchical' | 'timeline';
 
+export type JobType = 'setup' | 'build' | 'test' | 'security' | 'deploy' | 'other';
+
 interface NodeDatum extends d3.SimulationNodeDatum, Job {
   x?: number;
   y?: number;
@@ -10,6 +12,7 @@ interface NodeDatum extends d3.SimulationNodeDatum, Job {
   fy?: number | null;
   layer?: number;
   indexInLayer?: number;
+  jobType?: JobType;
 }
 
 interface EdgeDatum extends d3.SimulationLinkDatum<NodeDatum> {
@@ -78,9 +81,90 @@ export class D3GraphService {
       .attr('fill', '#3b82f6');
   }
 
+  private detectJobType(job: Job): JobType {
+    const name = job.name.toLowerCase();
+    const id = job.id.toLowerCase();
+    const combined = `${name} ${id}`;
+
+    // Setup/initialization jobs
+    if (/setup|install|init|prepare|checkout|cache|environment|configure/.test(combined)) {
+      return 'setup';
+    }
+
+    // Build jobs
+    if (/build|compile|bundle|package|image|docker/.test(combined)) {
+      return 'build';
+    }
+
+    // Test jobs
+    if (/test|spec|e2e|integration|unit|coverage|playwright/.test(combined)) {
+      return 'test';
+    }
+
+    // Security jobs
+    if (/security|scan|audit|trivy|sast|vulnerability|license/.test(combined)) {
+      return 'security';
+    }
+
+    // Deploy jobs
+    if (/deploy|release|publish|staging|production|prod|ship/.test(combined)) {
+      return 'deploy';
+    }
+
+    return 'other';
+  }
+
+  private getJobTypeColor(jobType: JobType): {
+    fill: string;
+    stroke: string;
+    gradient: [string, string];
+  } {
+    switch (jobType) {
+      case 'setup':
+        return {
+          fill: '#8b5cf6',
+          stroke: '#6d28d9',
+          gradient: ['#8b5cf6', '#7c3aed'],
+        };
+      case 'build':
+        return {
+          fill: '#3b82f6',
+          stroke: '#1e40af',
+          gradient: ['#3b82f6', '#2563eb'],
+        };
+      case 'test':
+        return {
+          fill: '#10b981',
+          stroke: '#047857',
+          gradient: ['#10b981', '#059669'],
+        };
+      case 'security':
+        return {
+          fill: '#f59e0b',
+          stroke: '#d97706',
+          gradient: ['#f59e0b', '#f97316'],
+        };
+      case 'deploy':
+        return {
+          fill: '#ec4899',
+          stroke: '#be185d',
+          gradient: ['#ec4899', '#db2777'],
+        };
+      default:
+        return {
+          fill: '#6b7280',
+          stroke: '#4b5563',
+          gradient: ['#6b7280', '#4b5563'],
+        };
+    }
+  }
+
   private transformData(pipeline: ParseResponse): { nodes: NodeDatum[]; edges: EdgeDatum[] } {
     const nodes: NodeDatum[] = pipeline.jobs.map((job) => {
-      const node: NodeDatum = { ...job };
+      const node: NodeDatum = {
+        ...job,
+        jobType: this.detectJobType(job),
+      };
       // Use predefined positions if available (for demo mode with nice initial layout)
       if (job.x !== undefined && job.y !== undefined) {
         node.x = job.x;
@@ -109,10 +193,43 @@ export class D3GraphService {
   ) {
     const { nodes, edges } = this.transformData(pipeline);
 
+    // Setup gradients for each job type
+    const defs = this.svg.select('defs');
+    const jobTypes: JobType[] = ['setup', 'build', 'test', 'security', 'deploy', 'other'];
+
+    jobTypes.forEach((type) => {
+      if (defs.select(`#gradient-force-${type}`).empty()) {
+        const colors = this.getJobTypeColor(type);
+        const gradient = defs
+          .append('linearGradient')
+          .attr('id', `gradient-force-${type}`)
+          .attr('x1', '0%')
+          .attr('y1', '0%')
+          .attr('x2', '100%')
+          .attr('y2', '100%');
+
+        gradient
+          .append('stop')
+          .attr('offset', '0%')
+          .attr('stop-color', colors.gradient[0])
+          .attr('stop-opacity', 1);
+
+        gradient
+          .append('stop')
+          .attr('offset', '100%')
+          .attr('stop-color', colors.gradient[1])
+          .attr('stop-opacity', 1);
+      }
+    });
+
+    // Node dimensions (same as hierarchical layout)
+    const nodeWidth = 200;
+    const nodeHeight = 100;
+
     // Check if nodes have predefined positions (demo mode)
     const hasInitialPositions = nodes.some((n) => n.x !== undefined && n.y !== undefined);
 
-    // Create force simulation with weaker forces if using initial positions
+    // Create force simulation with grid constraints
     this.simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -120,24 +237,26 @@ export class D3GraphService {
         d3
           .forceLink<NodeDatum, EdgeDatum>(edges)
           .id((d) => d.id)
-          .distance(hasInitialPositions ? 200 : 150)
-          .strength(hasInitialPositions ? 0.3 : 1)
+          .distance(250)
+          .strength(0.5)
       )
-      .force('charge', d3.forceManyBody().strength(hasInitialPositions ? -100 : -300))
+      .force('charge', d3.forceManyBody().strength(-800))
       .force('center', d3.forceCenter(this.width / 2, this.height / 2))
-      .force('collision', d3.forceCollide().radius(60))
-      .alphaDecay(hasInitialPositions ? 0.05 : 0.0228); // Faster settling with initial positions
+      .force('collision', d3.forceCollide().radius(120))
+      .alphaDecay(hasInitialPositions ? 0.05 : 0.0228);
 
-    // Render edges
+    // Render edges with orthogonal paths
     const link = this.g
       .append('g')
       .attr('class', 'edges')
-      .selectAll('line')
+      .selectAll('path')
       .data(edges)
-      .join('line')
+      .join('path')
       .attr('class', 'edge')
+      .attr('fill', 'none')
       .attr('stroke', '#94a3b8')
-      .attr('stroke-width', 2)
+      .attr('stroke-width', 2.5)
+      .attr('opacity', 0.7)
       .attr('marker-end', 'url(#arrowhead)');
 
     // Render nodes
@@ -148,7 +267,7 @@ export class D3GraphService {
       .data(nodes)
       .join('g')
       .attr('class', 'node')
-      .attr('cursor', 'pointer')
+      .attr('cursor', 'grab')
       .call(this.drag(this.simulation) as never)
       .on('click', (event, d) => {
         event.stopPropagation();
@@ -172,55 +291,129 @@ export class D3GraphService {
               typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
             const target =
               typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? 3 : 2;
+            return source === d.id || target === d.id ? 4 : 2.5;
+          })
+          .attr('opacity', (l) => {
+            const linkData = l as unknown as EdgeDatum;
+            const source =
+              typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
+            const target =
+              typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
+            return source === d.id || target === d.id ? 1 : 0.3;
           });
       })
       .on('mouseleave', () => {
         if (onNodeHover) onNodeHover(null);
-        // Reset edges
-        link.attr('stroke', '#94a3b8').attr('stroke-width', 2);
+        link.attr('stroke', '#94a3b8').attr('stroke-width', 2.5).attr('opacity', 0.7);
       });
 
-    // Add circles
+    // Add rounded rectangles with gradients (same as hierarchical layout)
     node
-      .append('circle')
-      .attr('r', 50)
-      .attr('fill', '#3b82f6')
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 3)
-      .attr('filter', 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))');
+      .append('rect')
+      .attr('width', nodeWidth)
+      .attr('height', nodeHeight)
+      .attr('x', -nodeWidth / 2)
+      .attr('y', -nodeHeight / 2)
+      .attr('rx', 12)
+      .attr('ry', 12)
+      .attr('fill', (d) => `url(#gradient-force-${d.jobType})`)
+      .attr('stroke', (d) => this.getJobTypeColor(d.jobType || 'other').stroke)
+      .attr('stroke-width', 2.5)
+      .attr('filter', 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15))');
 
-    // Add labels
+    // Add job type badge
+    node
+      .append('rect')
+      .attr('width', 70)
+      .attr('height', 22)
+      .attr('x', -nodeWidth / 2 + 8)
+      .attr('y', -nodeHeight / 2 + 8)
+      .attr('rx', 4)
+      .attr('ry', 4)
+      .attr('fill', 'rgba(0, 0, 0, 0.2)')
+      .attr('pointer-events', 'none');
+
     node
       .append('text')
-      .text((d) => this.truncateLabel(d.name, 15))
+      .text((d) => (d.jobType || 'other').toUpperCase())
+      .attr('x', -nodeWidth / 2 + 43)
+      .attr('y', -nodeHeight / 2 + 21)
       .attr('text-anchor', 'middle')
-      .attr('dy', '.35em')
-      .attr('fill', '#fff')
-      .attr('font-size', '13px')
+      .attr('fill', '#ffffff')
+      .attr('font-size', '10px')
+      .attr('font-weight', '700')
+      .attr('pointer-events', 'none');
+
+    // Add job names
+    node
+      .append('text')
+      .text((d) => this.truncateLabel(d.name, 25))
+      .attr('x', 0)
+      .attr('y', 8)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', '#ffffff')
+      .attr('font-size', '15px')
       .attr('font-weight', '600')
       .attr('pointer-events', 'none')
-      .style('text-shadow', '0 1px 2px rgba(0, 0, 0, 0.3)');
+      .style('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)');
 
-    // Update positions on tick
+    // Add step count
+    node
+      .append('text')
+      .text((d) => `${d.steps.length} step${d.steps.length !== 1 ? 's' : ''}`)
+      .attr('x', 0)
+      .attr('y', nodeHeight / 2 - 12)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'rgba(255, 255, 255, 0.8)')
+      .attr('font-size', '11px')
+      .attr('font-weight', '500')
+      .attr('pointer-events', 'none');
+
+    // Add dependency count if any
+    node
+      .filter((d) => d.dependencies.length > 0)
+      .append('text')
+      .text((d) => `↓ ${d.dependencies.length}`)
+      .attr('x', nodeWidth / 2 - 8)
+      .attr('y', -nodeHeight / 2 + 21)
+      .attr('text-anchor', 'end')
+      .attr('fill', 'rgba(255, 255, 255, 0.7)')
+      .attr('font-size', '10px')
+      .attr('font-weight', '600')
+      .attr('pointer-events', 'none');
+
+    // Update positions on tick with orthogonal edge routing
     this.simulation.on('tick', () => {
-      link
-        .attr('x1', (d) => {
-          const source = d.source as NodeDatum;
-          return source.x || 0;
-        })
-        .attr('y1', (d) => {
-          const source = d.source as NodeDatum;
-          return source.y || 0;
-        })
-        .attr('x2', (d) => {
-          const target = d.target as NodeDatum;
-          return target.x || 0;
-        })
-        .attr('y2', (d) => {
-          const target = d.target as NodeDatum;
-          return target.y || 0;
-        });
+      // Draw orthogonal paths for edges
+      link.attr('d', (d) => {
+        const source = d.source as NodeDatum;
+        const target = d.target as NodeDatum;
+        const sx = source.x || 0;
+        const sy = source.y || 0;
+        const tx = target.x || 0;
+        const ty = target.y || 0;
+
+        // Determine if we should route horizontally or vertically first
+        const dx = Math.abs(tx - sx);
+        const dy = Math.abs(ty - sy);
+
+        if (dx > dy) {
+          // Route horizontally first
+          const midX = (sx + tx) / 2;
+          return `M ${sx},${sy}
+                  L ${midX},${sy}
+                  L ${midX},${ty}
+                  L ${tx},${ty}`;
+        } else {
+          // Route vertically first
+          const midY = (sy + ty) / 2;
+          return `M ${sx},${sy}
+                  L ${sx},${midY}
+                  L ${tx},${midY}
+                  L ${tx},${ty}`;
+        }
+      });
 
       node.attr('transform', (d) => `translate(${d.x || 0},${d.y || 0})`);
     });
@@ -323,27 +516,27 @@ export class D3GraphService {
       nodesByLayer.get(layer)!.push(node);
     });
 
-    // Grid configuration
-    const nodeWidth = 240;
-    const nodeHeight = 80;
-    const horizontalSpacing = 280;
-    const verticalSpacing = 150;
-    const topPadding = 100;
-    const leftPadding = 100;
+    // Enhanced grid configuration for left-to-right layout
+    const nodeWidth = 200;
+    const nodeHeight = 100;
+    const horizontalSpacing = 300; // Space between layers
+    const verticalSpacing = 140; // Space between nodes in same layer
+    const topPadding = 60;
+    const leftPadding = 80;
 
-    // Position nodes on grid
+    // Position nodes in a left-to-right flow
     nodesByLayer.forEach((layerNodes, layer) => {
-      const layerWidth = layerNodes.length * horizontalSpacing;
-      const startX = (this.width - layerWidth) / 2 + leftPadding;
+      const layerHeight = layerNodes.length * verticalSpacing;
+      const startY = (this.height - layerHeight) / 2;
 
       layerNodes.forEach((node, index) => {
-        node.x = startX + index * horizontalSpacing + nodeWidth / 2;
-        node.y = topPadding + layer * verticalSpacing + nodeHeight / 2;
+        node.x = leftPadding + layer * horizontalSpacing;
+        node.y = startY + index * verticalSpacing + topPadding;
         node.indexInLayer = index;
       });
     });
 
-    // Render edges with straight lines
+    // Render edges with orthogonal (90-degree) paths
     const link = this.g
       .append('g')
       .attr('class', 'edges')
@@ -352,9 +545,37 @@ export class D3GraphService {
       .join('path')
       .attr('class', 'edge')
       .attr('fill', 'none')
-      .attr('stroke', '#cbd5e1')
-      .attr('stroke-width', 2)
+      .attr('stroke', '#94a3b8')
+      .attr('stroke-width', 2.5)
+      .attr('opacity', 0.7)
       .attr('marker-end', 'url(#arrowhead)');
+
+    // Setup gradients for each job type
+    const defs = this.svg.select('defs');
+    const jobTypes: JobType[] = ['setup', 'build', 'test', 'security', 'deploy', 'other'];
+
+    jobTypes.forEach((type) => {
+      const colors = this.getJobTypeColor(type);
+      const gradient = defs
+        .append('linearGradient')
+        .attr('id', `gradient-${type}`)
+        .attr('x1', '0%')
+        .attr('y1', '0%')
+        .attr('x2', '100%')
+        .attr('y2', '100%');
+
+      gradient
+        .append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', colors.gradient[0])
+        .attr('stop-opacity', 1);
+
+      gradient
+        .append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', colors.gradient[1])
+        .attr('stop-opacity', 1);
+    });
 
     // Render node groups
     const node = this.g
@@ -365,17 +586,14 @@ export class D3GraphService {
       .join('g')
       .attr('class', 'node')
       .attr('cursor', 'pointer')
-      .attr(
-        'transform',
-        (d) => `translate(${(d.x || 0) - nodeWidth / 2},${(d.y || 0) - nodeHeight / 2})`
-      )
+      .attr('transform', (d) => `translate(${d.x || 0},${d.y || 0})`)
       .on('click', (event, d) => {
         event.stopPropagation();
         if (onNodeClick) onNodeClick(d);
       })
       .on('mouseenter', (_event, d) => {
         if (onNodeHover) onNodeHover(d);
-        // Highlight connected edges
+        // Highlight connected edges and increase opacity
         link
           .attr('stroke', (l) => {
             const linkData = l as unknown as EdgeDatum;
@@ -391,79 +609,117 @@ export class D3GraphService {
               typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
             const target =
               typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? 3 : 2;
+            return source === d.id || target === d.id ? 4 : 2.5;
+          })
+          .attr('opacity', (l) => {
+            const linkData = l as unknown as EdgeDatum;
+            const source =
+              typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
+            const target =
+              typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
+            return source === d.id || target === d.id ? 1 : 0.3;
           });
       })
       .on('mouseleave', () => {
         if (onNodeHover) onNodeHover(null);
-        link.attr('stroke', '#cbd5e1').attr('stroke-width', 2);
+        link.attr('stroke', '#94a3b8').attr('stroke-width', 2.5).attr('opacity', 0.7);
       });
 
-    // Add rectangle backgrounds with gradient
-    const defs = this.svg.select('defs');
-
-    // Define gradient for nodes
-    const gradient = defs
-      .append('linearGradient')
-      .attr('id', 'node-gradient')
-      .attr('x1', '0%')
-      .attr('y1', '0%')
-      .attr('x2', '0%')
-      .attr('y2', '100%');
-
-    gradient
-      .append('stop')
-      .attr('offset', '0%')
-      .attr('stop-color', '#3b82f6')
-      .attr('stop-opacity', 1);
-
-    gradient
-      .append('stop')
-      .attr('offset', '100%')
-      .attr('stop-color', '#2563eb')
-      .attr('stop-opacity', 1);
-
-    // Add rectangles
+    // Add rounded rectangles with gradients based on job type
     node
       .append('rect')
       .attr('width', nodeWidth)
       .attr('height', nodeHeight)
-      .attr('rx', 8)
-      .attr('ry', 8)
-      .attr('fill', 'url(#node-gradient)')
-      .attr('stroke', '#1e40af')
-      .attr('stroke-width', 2)
-      .attr('filter', 'drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1))');
+      .attr('x', -nodeWidth / 2)
+      .attr('y', -nodeHeight / 2)
+      .attr('rx', 12)
+      .attr('ry', 12)
+      .attr('fill', (d) => `url(#gradient-${d.jobType})`)
+      .attr('stroke', (d) => this.getJobTypeColor(d.jobType || 'other').stroke)
+      .attr('stroke-width', 2.5)
+      .attr('filter', 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15))')
+      .attr('class', 'node-rect')
+      .style('transition', 'all 0.3s ease');
 
-    // Add job names
+    // Add job type badge
+    node
+      .append('rect')
+      .attr('width', 70)
+      .attr('height', 22)
+      .attr('x', -nodeWidth / 2 + 8)
+      .attr('y', -nodeHeight / 2 + 8)
+      .attr('rx', 4)
+      .attr('ry', 4)
+      .attr('fill', 'rgba(0, 0, 0, 0.2)')
+      .attr('pointer-events', 'none');
+
     node
       .append('text')
-      .text((d) => this.truncateLabel(d.name, 30))
-      .attr('x', nodeWidth / 2)
-      .attr('y', nodeHeight / 2)
+      .text((d) => (d.jobType || 'other').toUpperCase())
+      .attr('x', -nodeWidth / 2 + 43)
+      .attr('y', -nodeHeight / 2 + 21)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#ffffff')
+      .attr('font-size', '10px')
+      .attr('font-weight', '700')
+      .attr('pointer-events', 'none');
+
+    // Add job names (main label)
+    node
+      .append('text')
+      .text((d) => this.truncateLabel(d.name, 25))
+      .attr('x', 0)
+      .attr('y', 8)
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
       .attr('fill', '#ffffff')
-      .attr('font-size', '14px')
+      .attr('font-size', '15px')
+      .attr('font-weight', '600')
+      .attr('pointer-events', 'none')
+      .style('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)');
+
+    // Add step count indicator
+    node
+      .append('text')
+      .text((d) => `${d.steps.length} step${d.steps.length !== 1 ? 's' : ''}`)
+      .attr('x', 0)
+      .attr('y', nodeHeight / 2 - 12)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'rgba(255, 255, 255, 0.8)')
+      .attr('font-size', '11px')
+      .attr('font-weight', '500')
+      .attr('pointer-events', 'none');
+
+    // Add dependency count if any
+    node
+      .filter((d) => d.dependencies.length > 0)
+      .append('text')
+      .text((d) => `↓ ${d.dependencies.length}`)
+      .attr('x', nodeWidth / 2 - 8)
+      .attr('y', -nodeHeight / 2 + 21)
+      .attr('text-anchor', 'end')
+      .attr('fill', 'rgba(255, 255, 255, 0.7)')
+      .attr('font-size', '10px')
       .attr('font-weight', '600')
       .attr('pointer-events', 'none');
 
-    // Update edge paths to draw straight lines
+    // Update edge paths to draw orthogonal (90-degree) paths
     link.attr('d', (d) => {
       const source = d.source as NodeDatum;
       const target = d.target as NodeDatum;
 
-      const sourceX = source.x || 0;
-      const sourceY = (source.y || 0) + nodeHeight / 2;
-      const targetX = target.x || 0;
-      const targetY = (target.y || 0) - nodeHeight / 2;
+      const sourceX = (source.x || 0) + nodeWidth / 2;
+      const sourceY = source.y || 0;
+      const targetX = (target.x || 0) - nodeWidth / 2;
+      const targetY = target.y || 0;
 
-      // Draw straight line or gentle curve
-      const midY = (sourceY + targetY) / 2;
+      // Calculate midpoint for orthogonal routing
+      const midX = (sourceX + targetX) / 2;
 
+      // Draw orthogonal path: horizontal -> vertical -> horizontal
       return `M ${sourceX},${sourceY}
-              L ${sourceX},${midY}
-              L ${targetX},${midY}
+              L ${midX},${sourceY}
+              L ${midX},${targetY}
               L ${targetX},${targetY}`;
     });
   }
