@@ -1,4 +1,4 @@
-import { ButtonHTMLAttributes, ReactNode } from 'react';
+import { ButtonHTMLAttributes, ReactNode, memo } from 'react';
 import { clsx } from 'clsx';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -34,7 +34,11 @@ const sizeClasses = {
   large: 'px-6 py-4 text-base min-h-[52px]',
 };
 
-export function Button({
+/**
+ * Button component - Memoized for performance
+ * Prevents re-renders when props haven't changed
+ */
+export const Button = memo(function Button({
   variant = 'primary',
   size = 'medium',
   loading = false,
@@ -91,4 +95,4 @@ export function Button({
       {!loading && rightIcon && <span className="flex-shrink-0">{rightIcon}</span>}
     </button>
   );
-}
+});

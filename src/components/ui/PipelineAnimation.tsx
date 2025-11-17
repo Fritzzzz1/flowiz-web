@@ -27,7 +27,12 @@ export function PipelineAnimation() {
   const [flowProgress, setFlowProgress] = useState<Map<string, number>>(new Map());
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    let nodeAnimationTimeout: number;
+    let animationFrameId: number;
+    let lastFrameTime = 0;
+
+    // Node progression logic (runs every 2 seconds)
+    const progressNodes = () => {
       setActiveNodes((prev) => {
         const next = new Set(prev);
 
@@ -43,34 +48,43 @@ export function PipelineAnimation() {
         return next;
       });
 
-      // Animate flow particles
-      setFlowProgress((prev) => {
-        const next = new Map(prev);
-        connections.forEach((conn) => {
-          const key = `${conn.from}-${conn.to}`;
-          const current = next.get(key) || 0;
-          next.set(key, (current + 0.02) % 1);
-        });
-        return next;
-      });
-    }, 2000);
+      nodeAnimationTimeout = window.setTimeout(progressNodes, 2000);
+    };
 
-    // Particle animation
-    const particleInterval = setInterval(() => {
-      setFlowProgress((prev) => {
-        const next = new Map(prev);
-        connections.forEach((conn) => {
-          const key = `${conn.from}-${conn.to}`;
-          const current = next.get(key) || 0;
-          next.set(key, (current + 0.01) % 1);
+    // Start node progression
+    nodeAnimationTimeout = window.setTimeout(progressNodes, 2000);
+
+    // Particle animation using requestAnimationFrame for smooth 60fps animation
+    const animateParticles = (currentTime: number) => {
+      // Calculate delta time for frame-rate independent animation
+      const deltaTime = currentTime - lastFrameTime;
+
+      // Update approximately every 16ms (60fps) or use delta for smoother animation
+      if (deltaTime >= 16) {
+        setFlowProgress((prev) => {
+          const next = new Map(prev);
+          connections.forEach((conn) => {
+            const key = `${conn.from}-${conn.to}`;
+            const current = next.get(key) || 0;
+            // Adjust speed based on delta time for consistent animation
+            const increment = 0.01 * (deltaTime / 16);
+            next.set(key, (current + increment) % 1);
+          });
+          return next;
         });
-        return next;
-      });
-    }, 50);
+
+        lastFrameTime = currentTime;
+      }
+
+      animationFrameId = requestAnimationFrame(animateParticles);
+    };
+
+    // Start particle animation
+    animationFrameId = requestAnimationFrame(animateParticles);
 
     return () => {
-      clearInterval(interval);
-      clearInterval(particleInterval);
+      clearTimeout(nodeAnimationTimeout);
+      cancelAnimationFrame(animationFrameId);
     };
   }, []);
 

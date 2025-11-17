@@ -1,4 +1,4 @@
-import { ReactNode, HTMLAttributes } from 'react';
+import { ReactNode, HTMLAttributes, memo } from 'react';
 import { clsx } from 'clsx';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -15,7 +15,11 @@ const variantClasses = {
   elevated: 'bg-white dark:bg-dark-surface shadow-md border-none',
 };
 
-export function Card({
+/**
+ * Card component - Memoized for performance
+ * Prevents re-renders when props haven't changed
+ */
+export const Card = memo(function Card({
   header,
   footer,
   variant = 'default',
@@ -45,4 +49,4 @@ export function Card({
       )}
     </div>
   );
-}
+});

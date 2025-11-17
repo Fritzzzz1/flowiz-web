@@ -1,4 +1,4 @@
-import { ReactNode, HTMLAttributes } from 'react';
+import { ReactNode, HTMLAttributes, memo } from 'react';
 import { clsx } from 'clsx';
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
@@ -24,8 +24,9 @@ const sizeClasses = {
 /**
  * Badge component for displaying status, labels, and tags
  * Follows the FloWiz design system specifications
+ * Memoized for performance
  */
-export function Badge({
+export const Badge = memo(function Badge({
   variant = 'neutral',
   size = 'medium',
   children,
@@ -45,7 +46,7 @@ export function Badge({
       {children}
     </span>
   );
-}
+});
 
 /**
  * Status Badge - Specialized badge for pipeline status display

@@ -1,11 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Container } from '@components/layout/Container';
 import { Card } from '@components/ui/Card';
 import { Button } from '@components/ui/Button';
 import { PipelineGraph } from '@features/visualization/components/PipelineGraph';
 import { usePipelineStore } from '@store/pipeline.store';
-import { YAMLEditorPanel } from '@components/YAMLEditorPanel';
+import { YAMLEditorPanel } from '@features/upload/components/YAMLEditorPanel';
 import { DEMO_WORKFLOW_YAML } from '@/mocks/demo-workflow.yaml';
 import { convertYAMLToPipeline, convertPipelineToYAML } from '@services/yaml-converter.service';
 
@@ -18,7 +18,8 @@ export function Visualize() {
   const [yamlContent, setYamlContent] = useState(DEMO_WORKFLOW_YAML);
   const [yamlError, setYamlError] = useState<string | null>(null);
   const [showYamlEditor, setShowYamlEditor] = useState(true);
-  const [isDiagramUpdate, setIsDiagramUpdate] = useState(false);
+  // Use ref instead of state to prevent race conditions with setTimeout
+  const isDiagramUpdateRef = useRef(false);
 
   // Auto-load demo pipeline if in demo mode and no pipeline exists
   useEffect(() => {
@@ -41,9 +42,11 @@ export function Visualize() {
       if (!yamlError && newYaml.trim()) {
         const result = convertYAMLToPipeline(newYaml);
         if (result.success && result.data) {
-          setIsDiagramUpdate(true);
+          // Mark that this update came from the YAML editor to prevent feedback loop
+          isDiagramUpdateRef.current = true;
           setPipeline(result.data);
-          setTimeout(() => setIsDiagramUpdate(false), 100);
+          // Reset flag synchronously - no race conditions
+          isDiagramUpdateRef.current = false;
         }
       }
     },
@@ -52,13 +55,13 @@ export function Visualize() {
 
   // Handle pipeline changes from diagram editing (for future implementation)
   useEffect(() => {
-    if (currentPipeline && !isDiagramUpdate && isDemoMode) {
+    if (currentPipeline && !isDiagramUpdateRef.current && isDemoMode) {
       // Update YAML when diagram changes
       // This will be used when we implement diagram editing
       const newYaml = convertPipelineToYAML(currentPipeline);
       setYamlContent(newYaml);
     }
-  }, [currentPipeline, isDiagramUpdate, isDemoMode]);
+  }, [currentPipeline, isDemoMode]);
 
   // If not in demo mode and no pipeline, show message instead of redirect
   if (!currentPipeline && !isDemoMode) {
