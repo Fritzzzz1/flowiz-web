@@ -18,19 +18,12 @@ const legendItems: LegendItem[] = [
 export function JobTypeLegend() {
   return (
     <div className="absolute bottom-6 left-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 border border-gray-200 dark:border-gray-700">
-      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-        Job Types
-      </h3>
+      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Job Types</h3>
       <div className="flex flex-col gap-2">
         {legendItems.map((item) => (
           <div key={item.type} className="flex items-center gap-2">
-            <div
-              className="w-4 h-4 rounded"
-              style={{ backgroundColor: item.color }}
-            />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              {item.label}
-            </span>
+            <div className="w-4 h-4 rounded" style={{ backgroundColor: item.color }} />
+            <span className="text-xs text-gray-600 dark:text-gray-400">{item.label}</span>
           </div>
         ))}
       </div>

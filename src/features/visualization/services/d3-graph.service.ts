@@ -87,9 +87,7 @@ export class D3GraphService {
     const combined = `${name} ${id}`;
 
     // Setup/initialization jobs
-    if (
-      /setup|install|init|prepare|checkout|cache|environment|configure/.test(combined)
-    ) {
+    if (/setup|install|init|prepare|checkout|cache|environment|configure/.test(combined)) {
       return 'setup';
     }
 
@@ -116,7 +114,11 @@ export class D3GraphService {
     return 'other';
   }
 
-  private getJobTypeColor(jobType: JobType): { fill: string; stroke: string; gradient: [string, string] } {
+  private getJobTypeColor(jobType: JobType): {
+    fill: string;
+    stroke: string;
+    gradient: [string, string];
+  } {
     switch (jobType) {
       case 'setup':
         return {
@@ -161,7 +163,7 @@ export class D3GraphService {
     const nodes: NodeDatum[] = pipeline.jobs.map((job) => {
       const node: NodeDatum = {
         ...job,
-        jobType: this.detectJobType(job)
+        jobType: this.detectJobType(job),
       };
       // Use predefined positions if available (for demo mode with nice initial layout)
       if (job.x !== undefined && job.y !== undefined) {
