@@ -528,26 +528,20 @@ export class D3GraphService {
       link
         .attr('stroke', (l) => {
           const linkData = l as unknown as EdgeDatum;
-          const source =
-            typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-          const target =
-            typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
+          const source = typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
+          const target = typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
           return source === d.id || target === d.id ? '#3b82f6' : '#94a3b8';
         })
         .attr('stroke-width', (l) => {
           const linkData = l as unknown as EdgeDatum;
-          const source =
-            typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-          const target =
-            typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
+          const source = typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
+          const target = typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
           return source === d.id || target === d.id ? 4 : 2.5;
         })
         .attr('opacity', (l) => {
           const linkData = l as unknown as EdgeDatum;
-          const source =
-            typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-          const target =
-            typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
+          const source = typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
+          const target = typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
           return source === d.id || target === d.id ? 1 : 0.3;
         });
     };
