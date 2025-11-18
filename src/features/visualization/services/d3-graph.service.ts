@@ -194,33 +194,7 @@ export class D3GraphService {
     const { nodes, edges } = this.transformData(pipeline);
 
     // Setup gradients for each job type
-    const defs = this.svg.select('defs');
-    const jobTypes: JobType[] = ['setup', 'build', 'test', 'security', 'deploy', 'other'];
-
-    jobTypes.forEach((type) => {
-      if (defs.select(`#gradient-force-${type}`).empty()) {
-        const colors = this.getJobTypeColor(type);
-        const gradient = defs
-          .append('linearGradient')
-          .attr('id', `gradient-force-${type}`)
-          .attr('x1', '0%')
-          .attr('y1', '0%')
-          .attr('x2', '100%')
-          .attr('y2', '100%');
-
-        gradient
-          .append('stop')
-          .attr('offset', '0%')
-          .attr('stop-color', colors.gradient[0])
-          .attr('stop-opacity', 1);
-
-        gradient
-          .append('stop')
-          .attr('offset', '100%')
-          .attr('stop-color', colors.gradient[1])
-          .attr('stop-opacity', 1);
-      }
-    });
+    this.setupGradients('gradient-force-');
 
     // Node dimensions (same as hierarchical layout)
     const nodeWidth = 200;
@@ -260,6 +234,8 @@ export class D3GraphService {
       .attr('marker-end', 'url(#arrowhead)');
 
     // Render nodes
+    const edgeHandlers = this.createEdgeHighlightHandlers(link, onNodeHover);
+
     const node = this.g
       .append('g')
       .attr('class', 'nodes')
@@ -273,115 +249,11 @@ export class D3GraphService {
         event.stopPropagation();
         if (onNodeClick) onNodeClick(d);
       })
-      .on('mouseenter', (_event, d) => {
-        if (onNodeHover) onNodeHover(d);
-        // Highlight connected edges
-        link
-          .attr('stroke', (l) => {
-            const linkData = l as unknown as EdgeDatum;
-            const source =
-              typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-            const target =
-              typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? '#3b82f6' : '#94a3b8';
-          })
-          .attr('stroke-width', (l) => {
-            const linkData = l as unknown as EdgeDatum;
-            const source =
-              typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-            const target =
-              typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? 4 : 2.5;
-          })
-          .attr('opacity', (l) => {
-            const linkData = l as unknown as EdgeDatum;
-            const source =
-              typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-            const target =
-              typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? 1 : 0.3;
-          });
-      })
-      .on('mouseleave', () => {
-        if (onNodeHover) onNodeHover(null);
-        link.attr('stroke', '#94a3b8').attr('stroke-width', 2.5).attr('opacity', 0.7);
-      });
+      .on('mouseenter', edgeHandlers.onMouseEnter)
+      .on('mouseleave', edgeHandlers.onMouseLeave);
 
-    // Add rounded rectangles with gradients (same as hierarchical layout)
-    node
-      .append('rect')
-      .attr('width', nodeWidth)
-      .attr('height', nodeHeight)
-      .attr('x', -nodeWidth / 2)
-      .attr('y', -nodeHeight / 2)
-      .attr('rx', 12)
-      .attr('ry', 12)
-      .attr('fill', (d) => `url(#gradient-force-${d.jobType})`)
-      .attr('stroke', (d) => this.getJobTypeColor(d.jobType || 'other').stroke)
-      .attr('stroke-width', 2.5)
-      .attr('filter', 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15))');
-
-    // Add job type badge
-    node
-      .append('rect')
-      .attr('width', 70)
-      .attr('height', 22)
-      .attr('x', -nodeWidth / 2 + 8)
-      .attr('y', -nodeHeight / 2 + 8)
-      .attr('rx', 4)
-      .attr('ry', 4)
-      .attr('fill', 'rgba(0, 0, 0, 0.2)')
-      .attr('pointer-events', 'none');
-
-    node
-      .append('text')
-      .text((d) => (d.jobType || 'other').toUpperCase())
-      .attr('x', -nodeWidth / 2 + 43)
-      .attr('y', -nodeHeight / 2 + 21)
-      .attr('text-anchor', 'middle')
-      .attr('fill', '#ffffff')
-      .attr('font-size', '10px')
-      .attr('font-weight', '700')
-      .attr('pointer-events', 'none');
-
-    // Add job names
-    node
-      .append('text')
-      .text((d) => this.truncateLabel(d.name, 25))
-      .attr('x', 0)
-      .attr('y', 8)
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', '#ffffff')
-      .attr('font-size', '15px')
-      .attr('font-weight', '600')
-      .attr('pointer-events', 'none')
-      .style('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)');
-
-    // Add step count
-    node
-      .append('text')
-      .text((d) => `${d.steps.length} step${d.steps.length !== 1 ? 's' : ''}`)
-      .attr('x', 0)
-      .attr('y', nodeHeight / 2 - 12)
-      .attr('text-anchor', 'middle')
-      .attr('fill', 'rgba(255, 255, 255, 0.8)')
-      .attr('font-size', '11px')
-      .attr('font-weight', '500')
-      .attr('pointer-events', 'none');
-
-    // Add dependency count if any
-    node
-      .filter((d) => d.dependencies.length > 0)
-      .append('text')
-      .text((d) => `↓ ${d.dependencies.length}`)
-      .attr('x', nodeWidth / 2 - 8)
-      .attr('y', -nodeHeight / 2 + 21)
-      .attr('text-anchor', 'end')
-      .attr('fill', 'rgba(255, 255, 255, 0.7)')
-      .attr('font-size', '10px')
-      .attr('font-weight', '600')
-      .attr('pointer-events', 'none');
+    // Render all node visual elements
+    this.renderNodeElements(node, 'gradient-force-', nodeWidth, nodeHeight);
 
     // Update positions on tick with orthogonal edge routing
     this.simulation.on('tick', () => {
@@ -551,33 +423,11 @@ export class D3GraphService {
       .attr('marker-end', 'url(#arrowhead)');
 
     // Setup gradients for each job type
-    const defs = this.svg.select('defs');
-    const jobTypes: JobType[] = ['setup', 'build', 'test', 'security', 'deploy', 'other'];
-
-    jobTypes.forEach((type) => {
-      const colors = this.getJobTypeColor(type);
-      const gradient = defs
-        .append('linearGradient')
-        .attr('id', `gradient-${type}`)
-        .attr('x1', '0%')
-        .attr('y1', '0%')
-        .attr('x2', '100%')
-        .attr('y2', '100%');
-
-      gradient
-        .append('stop')
-        .attr('offset', '0%')
-        .attr('stop-color', colors.gradient[0])
-        .attr('stop-opacity', 1);
-
-      gradient
-        .append('stop')
-        .attr('offset', '100%')
-        .attr('stop-color', colors.gradient[1])
-        .attr('stop-opacity', 1);
-    });
+    this.setupGradients('gradient-');
 
     // Render node groups
+    const edgeHandlers = this.createEdgeHighlightHandlers(link, onNodeHover);
+
     const node = this.g
       .append('g')
       .attr('class', 'nodes')
@@ -591,117 +441,11 @@ export class D3GraphService {
         event.stopPropagation();
         if (onNodeClick) onNodeClick(d);
       })
-      .on('mouseenter', (_event, d) => {
-        if (onNodeHover) onNodeHover(d);
-        // Highlight connected edges and increase opacity
-        link
-          .attr('stroke', (l) => {
-            const linkData = l as unknown as EdgeDatum;
-            const source =
-              typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-            const target =
-              typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? '#3b82f6' : '#cbd5e1';
-          })
-          .attr('stroke-width', (l) => {
-            const linkData = l as unknown as EdgeDatum;
-            const source =
-              typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-            const target =
-              typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? 4 : 2.5;
-          })
-          .attr('opacity', (l) => {
-            const linkData = l as unknown as EdgeDatum;
-            const source =
-              typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
-            const target =
-              typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
-            return source === d.id || target === d.id ? 1 : 0.3;
-          });
-      })
-      .on('mouseleave', () => {
-        if (onNodeHover) onNodeHover(null);
-        link.attr('stroke', '#94a3b8').attr('stroke-width', 2.5).attr('opacity', 0.7);
-      });
+      .on('mouseenter', edgeHandlers.onMouseEnter)
+      .on('mouseleave', edgeHandlers.onMouseLeave);
 
-    // Add rounded rectangles with gradients based on job type
-    node
-      .append('rect')
-      .attr('width', nodeWidth)
-      .attr('height', nodeHeight)
-      .attr('x', -nodeWidth / 2)
-      .attr('y', -nodeHeight / 2)
-      .attr('rx', 12)
-      .attr('ry', 12)
-      .attr('fill', (d) => `url(#gradient-${d.jobType})`)
-      .attr('stroke', (d) => this.getJobTypeColor(d.jobType || 'other').stroke)
-      .attr('stroke-width', 2.5)
-      .attr('filter', 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15))')
-      .attr('class', 'node-rect')
-      .style('transition', 'all 0.3s ease');
-
-    // Add job type badge
-    node
-      .append('rect')
-      .attr('width', 70)
-      .attr('height', 22)
-      .attr('x', -nodeWidth / 2 + 8)
-      .attr('y', -nodeHeight / 2 + 8)
-      .attr('rx', 4)
-      .attr('ry', 4)
-      .attr('fill', 'rgba(0, 0, 0, 0.2)')
-      .attr('pointer-events', 'none');
-
-    node
-      .append('text')
-      .text((d) => (d.jobType || 'other').toUpperCase())
-      .attr('x', -nodeWidth / 2 + 43)
-      .attr('y', -nodeHeight / 2 + 21)
-      .attr('text-anchor', 'middle')
-      .attr('fill', '#ffffff')
-      .attr('font-size', '10px')
-      .attr('font-weight', '700')
-      .attr('pointer-events', 'none');
-
-    // Add job names (main label)
-    node
-      .append('text')
-      .text((d) => this.truncateLabel(d.name, 25))
-      .attr('x', 0)
-      .attr('y', 8)
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', '#ffffff')
-      .attr('font-size', '15px')
-      .attr('font-weight', '600')
-      .attr('pointer-events', 'none')
-      .style('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)');
-
-    // Add step count indicator
-    node
-      .append('text')
-      .text((d) => `${d.steps.length} step${d.steps.length !== 1 ? 's' : ''}`)
-      .attr('x', 0)
-      .attr('y', nodeHeight / 2 - 12)
-      .attr('text-anchor', 'middle')
-      .attr('fill', 'rgba(255, 255, 255, 0.8)')
-      .attr('font-size', '11px')
-      .attr('font-weight', '500')
-      .attr('pointer-events', 'none');
-
-    // Add dependency count if any
-    node
-      .filter((d) => d.dependencies.length > 0)
-      .append('text')
-      .text((d) => `↓ ${d.dependencies.length}`)
-      .attr('x', nodeWidth / 2 - 8)
-      .attr('y', -nodeHeight / 2 + 21)
-      .attr('text-anchor', 'end')
-      .attr('fill', 'rgba(255, 255, 255, 0.7)')
-      .attr('font-size', '10px')
-      .attr('font-weight', '600')
-      .attr('pointer-events', 'none');
+    // Render all node visual elements
+    this.renderNodeElements(node, 'gradient-', nodeWidth, nodeHeight);
 
     // Update edge paths to draw orthogonal (90-degree) paths
     link.attr('d', (d) => {
@@ -726,6 +470,179 @@ export class D3GraphService {
 
   private truncateLabel(text: string, maxLength: number): string {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  }
+
+  /**
+   * Sets up gradient definitions for each job type
+   * @param gradientIdPrefix - Prefix for gradient IDs (e.g., 'gradient-' or 'gradient-force-')
+   */
+  private setupGradients(gradientIdPrefix: string): void {
+    const defs = this.svg.select('defs');
+    const jobTypes: JobType[] = ['setup', 'build', 'test', 'security', 'deploy', 'other'];
+
+    jobTypes.forEach((type) => {
+      const gradientId = `${gradientIdPrefix}${type}`;
+
+      // Skip if gradient already exists
+      if (!defs.select(`#${gradientId}`).empty()) {
+        return;
+      }
+
+      const colors = this.getJobTypeColor(type);
+      const gradient = defs
+        .append('linearGradient')
+        .attr('id', gradientId)
+        .attr('x1', '0%')
+        .attr('y1', '0%')
+        .attr('x2', '100%')
+        .attr('y2', '100%');
+
+      gradient
+        .append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', colors.gradient[0])
+        .attr('stop-opacity', 1);
+
+      gradient
+        .append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', colors.gradient[1])
+        .attr('stop-opacity', 1);
+    });
+  }
+
+  /**
+   * Creates edge highlighting event handlers for node hover interactions
+   * @param link - D3 selection of edge elements
+   * @param onNodeHover - Optional callback for node hover events
+   * @returns Object with mouseenter and mouseleave handlers
+   */
+  private createEdgeHighlightHandlers(
+    link: d3.Selection<SVGPathElement, EdgeDatum, SVGGElement, unknown>,
+    onNodeHover?: (node: NodeDatum | null) => void
+  ) {
+    const onMouseEnter = (_event: MouseEvent, d: NodeDatum) => {
+      if (onNodeHover) onNodeHover(d);
+
+      // Highlight connected edges
+      link
+        .attr('stroke', (l) => {
+          const linkData = l as unknown as EdgeDatum;
+          const source = typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
+          const target = typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
+          return source === d.id || target === d.id ? '#3b82f6' : '#94a3b8';
+        })
+        .attr('stroke-width', (l) => {
+          const linkData = l as unknown as EdgeDatum;
+          const source = typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
+          const target = typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
+          return source === d.id || target === d.id ? 4 : 2.5;
+        })
+        .attr('opacity', (l) => {
+          const linkData = l as unknown as EdgeDatum;
+          const source = typeof linkData.source === 'object' ? linkData.source.id : linkData.source;
+          const target = typeof linkData.target === 'object' ? linkData.target.id : linkData.target;
+          return source === d.id || target === d.id ? 1 : 0.3;
+        });
+    };
+
+    const onMouseLeave = () => {
+      if (onNodeHover) onNodeHover(null);
+      link.attr('stroke', '#94a3b8').attr('stroke-width', 2.5).attr('opacity', 0.7);
+    };
+
+    return { onMouseEnter, onMouseLeave };
+  }
+
+  /**
+   * Renders node SVG elements (rectangles, badges, labels, etc.)
+   * @param nodeSelection - D3 selection of node groups
+   * @param gradientIdPrefix - Prefix for gradient IDs
+   * @param nodeWidth - Width of node rectangles
+   * @param nodeHeight - Height of node rectangles
+   */
+  private renderNodeElements(
+    nodeSelection: d3.Selection<SVGGElement, NodeDatum, SVGGElement, unknown>,
+    gradientIdPrefix: string,
+    nodeWidth: number,
+    nodeHeight: number
+  ): void {
+    // Add rounded rectangles with gradients
+    nodeSelection
+      .append('rect')
+      .attr('width', nodeWidth)
+      .attr('height', nodeHeight)
+      .attr('x', -nodeWidth / 2)
+      .attr('y', -nodeHeight / 2)
+      .attr('rx', 12)
+      .attr('ry', 12)
+      .attr('fill', (d) => `url(#${gradientIdPrefix}${d.jobType})`)
+      .attr('stroke', (d) => this.getJobTypeColor(d.jobType || 'other').stroke)
+      .attr('stroke-width', 2.5)
+      .attr('filter', 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15))');
+
+    // Add job type badge background
+    nodeSelection
+      .append('rect')
+      .attr('width', 70)
+      .attr('height', 22)
+      .attr('x', -nodeWidth / 2 + 8)
+      .attr('y', -nodeHeight / 2 + 8)
+      .attr('rx', 4)
+      .attr('ry', 4)
+      .attr('fill', 'rgba(0, 0, 0, 0.2)')
+      .attr('pointer-events', 'none');
+
+    // Add job type badge text
+    nodeSelection
+      .append('text')
+      .text((d) => (d.jobType || 'other').toUpperCase())
+      .attr('x', -nodeWidth / 2 + 43)
+      .attr('y', -nodeHeight / 2 + 21)
+      .attr('text-anchor', 'middle')
+      .attr('fill', '#ffffff')
+      .attr('font-size', '10px')
+      .attr('font-weight', '700')
+      .attr('pointer-events', 'none');
+
+    // Add job name label
+    nodeSelection
+      .append('text')
+      .text((d) => this.truncateLabel(d.name, 25))
+      .attr('x', 0)
+      .attr('y', 8)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', '#ffffff')
+      .attr('font-size', '15px')
+      .attr('font-weight', '600')
+      .attr('pointer-events', 'none')
+      .style('text-shadow', '0 2px 4px rgba(0, 0, 0, 0.3)');
+
+    // Add step count indicator
+    nodeSelection
+      .append('text')
+      .text((d) => `${d.steps.length} step${d.steps.length !== 1 ? 's' : ''}`)
+      .attr('x', 0)
+      .attr('y', nodeHeight / 2 - 12)
+      .attr('text-anchor', 'middle')
+      .attr('fill', 'rgba(255, 255, 255, 0.8)')
+      .attr('font-size', '11px')
+      .attr('font-weight', '500')
+      .attr('pointer-events', 'none');
+
+    // Add dependency count if any
+    nodeSelection
+      .filter((d) => d.dependencies.length > 0)
+      .append('text')
+      .text((d) => `↓ ${d.dependencies.length}`)
+      .attr('x', nodeWidth / 2 - 8)
+      .attr('y', -nodeHeight / 2 + 21)
+      .attr('text-anchor', 'end')
+      .attr('fill', 'rgba(255, 255, 255, 0.7)')
+      .attr('font-size', '10px')
+      .attr('font-weight', '600')
+      .attr('pointer-events', 'none');
   }
 
   zoomIn() {

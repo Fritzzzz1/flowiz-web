@@ -11,6 +11,14 @@ export function useD3Graph(
   const graphServiceRef = useRef<D3GraphService | null>(null);
   const [isReady, setIsReady] = useState(false);
 
+  // Store the latest callback in a ref to avoid re-renders when callback changes
+  const onNodeClickRef = useRef(onNodeClick);
+
+  // Update ref when callback changes (without triggering re-render)
+  useEffect(() => {
+    onNodeClickRef.current = onNodeClick;
+  }, [onNodeClick]);
+
   // Initialize D3 service
   useEffect(() => {
     if (!svgRef.current) return;
@@ -32,13 +40,18 @@ export function useD3Graph(
 
     const graphService = graphServiceRef.current;
 
+    // Use a stable callback that references the latest callback from ref
+    const stableNodeClickHandler = (node: Job) => {
+      onNodeClickRef.current?.(node);
+    };
+
     if (layout === 'force') {
-      graphService.renderForceDirectedLayout(pipeline, onNodeClick);
+      graphService.renderForceDirectedLayout(pipeline, stableNodeClickHandler);
     } else if (layout === 'hierarchical') {
-      graphService.renderHierarchicalLayout(pipeline, onNodeClick);
+      graphService.renderHierarchicalLayout(pipeline, stableNodeClickHandler);
     }
     // Add other layouts here in the future
-  }, [pipeline, layout, isReady, onNodeClick]);
+  }, [pipeline, layout, isReady]); // Removed onNodeClick from dependencies
 
   const zoomIn = useCallback(() => {
     graphServiceRef.current?.zoomIn();
